@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Tests", "test\HACC.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Demo", "src\HACC.Demo\HACC.Demo.csproj", "{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "..\gui.cs\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "src\gui.cs\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
