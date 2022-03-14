@@ -7,3 +7,6 @@
 [submodule "src/HACC.Demo"]
 	path = src/HACC.Demo
 	url = https://github.com/HACC-ers/HACC.Demo.git
+[submodule "src/gui.cs"]
+	path = src/gui.cs
+	url = https://github.com/migueldeicaza/gui.cs.git
