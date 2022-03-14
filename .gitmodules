@@ -9,4 +9,4 @@
 	url = https://github.com/HACC-ers/HACC.Demo.git
 [submodule "src/gui.cs"]
 	path = src/gui.cs
-	url = https://github.com/migueldeicaza/gui.cs.git
+	url = https://github.com/HACC-ers/gui.cs.git
