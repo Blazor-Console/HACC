@@ -1,16 +1,16 @@
 [submodule "src/HACC"]
 	path = src/HACC
-	url = https://github.com/HACC-ers/HACC.git
+	url = https://github.com/Blazor-Console/HACC.git
 	branch = main
 [submodule "test/HACC.Tests"]
 	path = test/HACC.Tests
-	url = https://github.com/HACC-ers/HACC.Tests.git
+	url = https://github.com/Blazor-Console/HACC.Tests.git
 	branch = main
 [submodule "src/HACC.Demo"]
 	path = src/HACC.Demo
-	url = https://github.com/HACC-ers/HACC.Demo.git
+	url = https://github.com/Blazor-Console/HACC.Demo.git
 	branch = main
 [submodule "src/gui.cs"]
 	path = src/gui.cs
-	url = https://github.com/HACC-ers/gui.cs.git
+	url = https://github.com/Blazor-Console/gui.cs.git
 	branch = main
