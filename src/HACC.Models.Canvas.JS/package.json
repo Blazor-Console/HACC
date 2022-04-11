@@ -1,0 +1,21 @@
+{
+  "name": "HACC.Models.Canvas",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack-cli",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "@types/emscripten": "1.39.6",
+    "ts-loader": "^9.2.8",
+    "typescript": "^3.5.3",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2",
+    "uuid": "8.3.1"
+  }
+}

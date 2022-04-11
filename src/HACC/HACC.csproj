@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <Title>HTML5 Canvas Console and Blazor Extensions</Title>
+    <Description>HTML5 Canvas API implementation and Gui.cs/Terminal.Gui and Spectre.Console components for ASP.NET Core Blazor.</Description>
+    <PackageId>HACC</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>HACC</RootNamespace>
+        <AssemblyName>HACC</AssemblyName>
+        <OutputType>Library</OutputType>
+       <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeP2POutput</TargetsForTfmSpecificBuildOutput>
+    </PropertyGroup>
+
+  <Target Name="IncludeP2POutput">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)HACC.Models.Canvas.JS.dll" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <Content Update="**\*.razor">
+      <Pack>false</Pack>
+    </Content>
+  </ItemGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
+        <PackageReference Include="Spectre.Console" Version="0.44.0" />
+        <PackageReference Include="Spectre.Console.Extensions.Logging" Version="0.2.1" />
+        <PackageReference Include="Spectre.Console.Extensions.Progress" Version="1.0.0" />
+        <PackageReference Include="Spectre.Console.Extensions.Table" Version="1.0.0" />
+        <PackageReference Include="Spectre.Console.ImageSharp" Version="0.44.0" />
+        <PackageReference Include="Spectre.Console.Registrars.SimpleInjector" Version="0.3.0" />
+        <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Resources\WebStrings.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Strings.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\WebStrings.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>WebStrings.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\WebStrings.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>WebStrings.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+</Project>
