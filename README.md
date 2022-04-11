@@ -19,7 +19,7 @@ C# DotNet 6 HTML ANSI Console Canvas.
 
 ## Development
 
-* https://github.com/Blazor-Console/HACC.Development/wiki/Developing
+* https://github.com/Blazor-Console/HACC/wiki/Developing
 
 ## Future
 
