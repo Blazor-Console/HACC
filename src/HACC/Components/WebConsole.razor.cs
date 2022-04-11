@@ -155,42 +155,42 @@ public partial class WebConsole : ComponentBase
     }
 
     public async Task DrawDirtySegmentToCanvas(
-        List<((ConsoleColor bg, ConsoleColor fg) attribute, int row, int col, string text)> segments,
+        List<DirtySegment> segments,
         TerminalSettings terminalSettings)
     {
         if (!this.CanvasInitialized) return;
         if (segments.Count == 0) return;
 
         Logger.LogDebug(message: "DrawBufferToFrame");
-        var lastRow = segments[index: 0].row;
-        double textWidthEm = segments[index: 0].col;
+        var lastRow = segments[index: 0].Row;
+        double textWidthEm = segments[index: 0].Column;
 
         foreach (var segment in segments)
         {
-            if (segment.row != lastRow)
+            if (segment.Row != lastRow)
             {
-                lastRow = segment.row;
-                textWidthEm = segment.col;
+                lastRow = segment.Row;
+                textWidthEm = segment.Column;
             }
 
-            var measuredText = await this.MeasureText(text: segment.text);
+            var measuredText = await this.MeasureText(text: segment.Text);
             var letterWidthPx = terminalSettings.FontSizePixels;
             await this._canvas2DContext!.SetFontAsync(
                 value: $"{letterWidthPx}px " +
                        $"{terminalSettings.FontType}");
             await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
             await this._canvas2DContext!.SetFillStyleAsync(
-                value: $"{segment.attribute.bg}");
+                value: $"{segment.BackgroundColor}");
             await this._canvas2DContext.FillRectAsync(
                 x: textWidthEm,
-                y: segment.row * letterWidthPx,
-                width: segment.text.Length * measuredText!.Width,
+                y: segment.Row * letterWidthPx,
+                width: segment.Text.Length * measuredText!.Width,
                 height: letterWidthPx);
             await this._canvas2DContext!.SetStrokeStyleAsync(
-                value: $"{segment.attribute.fg}");
-            await this._canvas2DContext.StrokeTextAsync(text: segment.text,
+                value: $"{segment.ForegroundColor}");
+            await this._canvas2DContext.StrokeTextAsync(text: segment.Text,
                 x: textWidthEm,
-                y: segment.row * letterWidthPx);
+                y: segment.Row * letterWidthPx);
 
             textWidthEm += measuredText!.Width;
         }

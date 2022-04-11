@@ -243,7 +243,7 @@ public partial class WebConsoleDriver
     {
         if (this.firstRender) return;
 
-        var dirtySegments = new List<((ConsoleColor bg, ConsoleColor fg) attribute, int row, int col, string text)>();
+        var dirtySegments = new List<DirtySegment>();
         lock (this.Contents)
         {
             var output = new System.Text.StringBuilder();
@@ -276,12 +276,12 @@ public partial class WebConsoleDriver
                     {
                         // we've reached a new color, add the segment and start a new one
                         if (output.Length > 0)
-                            dirtySegments.Add(item: (
-                                attribute: (bg: this.TerminalSettings.TerminalBackground,
-                                    fg: this.TerminalSettings.TerminalForeground),
-                                row,
-                                col: segmentStart,
-                                text: output.ToString()));
+                            dirtySegments.Add(item: new DirtySegment(
+                                BackgroundColor: this.TerminalSettings.TerminalBackground,
+                                ForegroundColor: this.TerminalSettings.TerminalForeground,
+                                Row: row,
+                                Column: segmentStart,
+                                Text: output.ToString()));
                         segmentStart = col;
                         output.Clear();
                         this.SetColor(color: color);
@@ -301,12 +301,12 @@ public partial class WebConsoleDriver
                 // in case the segment ends at the end of the line, add it
                 if (output.Length > 0)
                 {
-                    dirtySegments.Add(item: (
-                        attribute: (bg: this.TerminalSettings.TerminalBackground,
-                            fg: this.TerminalSettings.TerminalForeground),
-                        row,
-                        col: segmentStart,
-                        text: output.ToString()));
+                    dirtySegments.Add(item: new DirtySegment(
+                        BackgroundColor: this.TerminalSettings.TerminalBackground,
+                        ForegroundColor: this.TerminalSettings.TerminalForeground,
+                        Row: row,
+                        Column: segmentStart,
+                        Text: output.ToString()));
                     output.Clear();
                 }
             } // row
