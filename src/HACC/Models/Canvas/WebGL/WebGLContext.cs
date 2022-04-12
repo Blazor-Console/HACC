@@ -6,7 +6,7 @@ namespace HACC.Models.Canvas.WebGL;
 
 public class WebGLContext : RenderingContext
 {
-    public WebGLContext(WebConsole reference, WebGLContextAttributes? attributes = null) : base(reference: reference,
+    public WebGLContext(BECanvas reference, WebGLContextAttributes? attributes = null) : base(reference: reference,
         contextName: CONTEXT_NAME,
         parameters: attributes)
     {

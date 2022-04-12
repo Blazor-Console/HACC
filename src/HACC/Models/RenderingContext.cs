@@ -25,7 +25,7 @@ public abstract class RenderingContext : IDisposable
     private bool _batching;
     private bool _initialized;
 
-    internal RenderingContext(WebConsole reference, string contextName, object? parameters = null)
+    internal RenderingContext(BECanvas reference, string contextName, object? parameters = null)
     {
         this.Canvas = reference.CanvasReference;
         this._jsRuntime = HaccExtensions.GetService<IJSRuntime>();
