@@ -3,7 +3,7 @@
     <Title>HTML5 Canvas Console and Blazor Extensions</Title>
     <Description>HTML5 Canvas API implementation and Gui.cs/Terminal.Gui and Spectre.Console components for ASP.NET Core Blazor</Description>
     <PackageId>HACC</PackageId>
-    <PackageVersion>0.1.0</PackageVersion>
+    <PackageVersion>0.1.1</PackageVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
@@ -22,8 +22,14 @@
        <PackageProjectUrl>https://github.com/Blazor-Console/HACC</PackageProjectUrl>
        <RepositoryUrl>https://github.com/Blazor-Console/HACC</RepositoryUrl>
        <PackageTags>html5 ansi blazor canvas console extensiojs</PackageTags>
-       <AssemblyVersion>0.1.0</AssemblyVersion>
+       <AssemblyVersion>0.1.1</AssemblyVersion>
     </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Version)' == '' ">
+    <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">0.1.1</VersionPrefix>
+    <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
+  </PropertyGroup>
 
   <Target Name="IncludeP2POutput">
     <ItemGroup>

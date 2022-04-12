@@ -30,6 +30,7 @@ public partial class WebConsole : ComponentBase
     private Canvas2DContext? _canvas2DContext;
 
     protected ElementReference _canvasRef;
+    protected BECanvas? _becanvasRef;
 
     /// <summary>
     ///     Null until after render
@@ -78,7 +79,7 @@ public partial class WebConsole : ComponentBase
         if (firstRender)
         {
             Logger.LogDebug(message: "OnAfterRenderAsync");
-            this._canvas2DContext = await this.CreateCanvas2DAsync();
+            this._canvas2DContext = await this._becanvasRef.CreateCanvas2DAsync();
 
             var thisObject = DotNetObjectReference.Create(value: this);
             await JsInterop!.InvokeVoidAsync(identifier: "initConsole",

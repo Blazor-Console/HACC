@@ -5,7 +5,7 @@ namespace HACC.Models.Canvas.Canvas2D;
 
 public class Canvas2DContext : RenderingContext
 {
-    public Canvas2DContext(WebConsole reference) : base(reference: reference,
+    public Canvas2DContext(BECanvas reference) : base(reference: reference,
         contextName: CONTEXT_NAME)
     {
     }
