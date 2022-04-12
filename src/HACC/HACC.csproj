@@ -71,6 +71,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" PrivateAssets="All" />
+        <ProjectReference Include="..\HACC.Models.Canvas.JS\HACC.Models.Canvas.JS.csproj" />
     </ItemGroup>
 
     <ItemGroup>
