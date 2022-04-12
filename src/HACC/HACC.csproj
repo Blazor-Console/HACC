@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
     <Title>HTML5 Canvas Console and Blazor Extensions</Title>
-    <Description>HTML5 Canvas API implementation and Gui.cs/Terminal.Gui and Spectre.Console components for ASP.NET Core Blazor.</Description>
+    <Description>HTML5 Canvas API implementation and Gui.cs/Terminal.Gui and Spectre.Console components for ASP.NET Core Blazor</Description>
     <PackageId>HACC</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>0.1.0</PackageVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,13 +16,27 @@
         <AssemblyName>HACC</AssemblyName>
         <OutputType>Library</OutputType>
        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeP2POutput</TargetsForTfmSpecificBuildOutput>
+       <PackageLicenseExpression>MIT</PackageLicenseExpression>
+       <PackageReadmeFile>README.md</PackageReadmeFile>
+       <Copyright>Digital Defiance contributors</Copyright>
+       <PackageProjectUrl>https://github.com/Blazor-Console/HACC</PackageProjectUrl>
+       <RepositoryUrl>https://github.com/Blazor-Console/HACC</RepositoryUrl>
+       <PackageTags>html5 ansi blazor canvas console extensiojs</PackageTags>
+       <AssemblyVersion>0.1.0</AssemblyVersion>
     </PropertyGroup>
 
   <Target Name="IncludeP2POutput">
     <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)HACC.Models.Canvas.JS.dll" />
+      <BuildOutputInPackage Include="..\HACC.Models.Canvas.JS\$(OutputPath)HACC.Models.Canvas.JS.dll" />
     </ItemGroup>
   </Target>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <Content Update="**\*.razor">
@@ -33,9 +49,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.4" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.4" />
         <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
         <PackageReference Include="Spectre.Console" Version="0.44.0" />
         <PackageReference Include="Spectre.Console.Extensions.Logging" Version="0.2.1" />
@@ -47,7 +64,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" />
+        <ProjectReference Include="..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>

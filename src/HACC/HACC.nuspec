@@ -4,14 +4,14 @@
     <id>$id$</id>
     <version>$version$</version>
     <title>HTML5 ANSI Console Canvas</title>
-    <authors>Jessica Mulein</authors>
+    <authors>Digital Defiance contributors</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <!-- <icon>icon.png</icon> -->
     <projectUrl>https://github.com/Blazor-Console/HACC</projectUrl>
     <description>HTML5 ANSI Console Canvas (Blazor Component)</description>
-    <releaseNotes>Internal alpha</releaseNotes>
-    <copyright>(c) 2022 Jessica Mulein and collaborators</copyright>
+    <releaseNotes>alpha</releaseNotes>
+    <copyright>(c) 2022 Digital Defiance contributors</copyright>
     <tags>html5 ansi console canvas blazor</tags>
   </metadata>
 </package>

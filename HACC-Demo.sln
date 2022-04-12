@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC", "src\HACC\HACC.csproj", "{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Demo", "src\HACC.Demo\HACC.Demo.csproj", "{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "src\gui.cs\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Models.Canvas.JS", "src\HACC.Models.Canvas.JS\HACC.Models.Canvas.JS.csproj", "{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HACC.Models.Canvas.Test.ClientSide", "test\HACC.Tests\HACC.Models.Canvas.Test.ClientSide\HACC.Models.Canvas.Test.ClientSide.csproj", "{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HACC.Models.Canvas.Test.ServerSide", "test\HACC.Tests\HACC.Models.Canvas.Test.ServerSide\HACC.Models.Canvas.Test.ServerSide.csproj", "{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C53630DB-CA65-4ADF-ACB2-2843F5F6A6BA}
+	EndGlobalSection
+EndGlobal

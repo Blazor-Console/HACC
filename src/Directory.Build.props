@@ -1,15 +1,14 @@
 <Project>
   <!-- Set common properties regarding assembly information and nuget packages -->
   <PropertyGroup>
-    <Authors>Blazor Extensions Contributors</Authors>
-    <Product>Blazor Extensions</Product>
-    <Copyright>(c) Blazor Extensions Contributors. All rights reserved.</Copyright>
-    <PackageLicenseUrl>https://github.com/BlazorExtensions/Canvas#license</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/BlazorExtensions/Canvas</PackageProjectUrl>
-    <PackageIconUrl>https://avatars2.githubusercontent.com/u/38994076?s%3D128%26v%3D4</PackageIconUrl>
-    <PackageTags>Microsoft ASP.NET Core Blazor Extensions Canvas</PackageTags>
+    <Authors>Digital Defiance Contributors</Authors>
+    <Product>Blazor Console Canvas</Product>
+    <Copyright>(c) Digital Defiance and Blazor Extensions Contributors. All rights reserved.</Copyright>
+    <License>MIT</License>
+    <PackageProjectUrl>https://github.com/Blazor-Console/HACC</PackageProjectUrl>
+    <PackageTags>Microsoft ASP.NET Core Blazor Extensions Canvas HTML5 ansi console canvas</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <RepositoryUrl>https://github.com/BlazorExtensions/Canvas</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Blazor-Console/HACC</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
@@ -24,8 +23,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <TestProjectTargetFramework>netstandard2.0</TestProjectTargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
+    <TestProjectTargetFramework>net6.0</TestProjectTargetFramework>
   </PropertyGroup>
 
   <!-- Versioning properties -->
