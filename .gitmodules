@@ -10,3 +10,6 @@
 	path = src/gui.cs
 	url = https://github.com/Blazor-Console/gui.cs.git
 	branch = main
+[submodule "src/Blazor.Extensions.Canvas"]
+	path = src/Blazor.Extensions.Canvas
+	url = https://github.com/Blazor-Console/Blazor.Extensions.Canvas.git
