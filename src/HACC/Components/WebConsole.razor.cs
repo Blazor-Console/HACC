@@ -1,5 +1,8 @@
 using System.Drawing;
 using System.Globalization;
+using Blazor.Extensions;
+using Blazor.Extensions.Canvas.Components;
+using Blazor.Extensions.Canvas.Extensions;
 using HACC.Applications;
 using HACC.Extensions;
 using HACC.Models;
@@ -79,7 +82,7 @@ public partial class WebConsole : ComponentBase
         if (firstRender)
         {
             Logger.LogDebug(message: "OnAfterRenderAsync");
-            this._canvas2DContext = await this._becanvasRef.CreateCanvas2DAsync();
+            this._canvas2DContext = await this._becanvasRef!.CreateCanvas2DAsync();
 
             var thisObject = DotNetObjectReference.Create(value: this);
             await JsInterop!.InvokeVoidAsync(identifier: "initConsole",

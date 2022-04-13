@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Demo", "src\HACC.Demo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "src\gui.cs\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Models.Canvas.JS", "src\HACC.Models.Canvas.JS\HACC.Models.Canvas.JS.csproj", "{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Extensions.Canvas", "src\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj", "{9451E28E-8B00-4624-A0A3-6610D54FFA55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HACC.Models.Canvas.Test.ClientSide", "test\HACC.Tests\HACC.Models.Canvas.Test.ClientSide\HACC.Models.Canvas.Test.ClientSide.csproj", "{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Extensions.Canvas.Test.ClientSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ClientSide\Blazor.Extensions.Canvas.Test.ClientSide.csproj", "{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HACC.Models.Canvas.Test.ServerSide", "test\HACC.Tests\HACC.Models.Canvas.Test.ServerSide\HACC.Models.Canvas.Test.ServerSide.csproj", "{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Extensions.Canvas.Test.ServerSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ServerSide\Blazor.Extensions.Canvas.Test.ServerSide.csproj", "{9A9AB208-10CB-42F7-B05A-8CB1F0F2A1F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Extensions.Canvas.JS", "src\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas.JS\Blazor.Extensions.Canvas.JS.csproj", "{27AAE2DB-36FA-45B4-8063-32AFD0EA77AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,18 +35,22 @@ Global
 		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C903BA2-83EE-45D0-8880-0BFEE9A4DCA3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B4C81A30-01FB-46A3-B50C-B8F874BFF47C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CD90AD4-31D8-40EE-A15A-E6E6C4BDDC4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A9AB208-10CB-42F7-B05A-8CB1F0F2A1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A9AB208-10CB-42F7-B05A-8CB1F0F2A1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A9AB208-10CB-42F7-B05A-8CB1F0F2A1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A9AB208-10CB-42F7-B05A-8CB1F0F2A1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27AAE2DB-36FA-45B4-8063-32AFD0EA77AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27AAE2DB-36FA-45B4-8063-32AFD0EA77AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27AAE2DB-36FA-45B4-8063-32AFD0EA77AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27AAE2DB-36FA-45B4-8063-32AFD0EA77AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

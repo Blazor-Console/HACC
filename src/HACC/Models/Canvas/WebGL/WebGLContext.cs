@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Blazor.Extensions.Canvas.Components;
 using HACC.Components;
 using HACC.Enumerations;
 
