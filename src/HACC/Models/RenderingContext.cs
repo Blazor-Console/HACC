@@ -1,3 +1,4 @@
+using Blazor.Extensions.Canvas;
 using HACC.Components;
 using HACC.Extensions;
 using Microsoft.AspNetCore.Components;

@@ -1,7 +1,3 @@
-[submodule "test/HACC.Tests"]
-	path = test/HACC.Tests
-	url = https://github.com/Blazor-Console/HACC.Tests.git
-	branch = main
 [submodule "src/HACC.Demo"]
 	path = src/HACC.Demo
 	url = https://github.com/Blazor-Console/HACC.Demo.git
@@ -10,3 +6,7 @@
 	path = src/gui.cs
 	url = https://github.com/Blazor-Console/gui.cs.git
 	branch = main
+[submodule "src/Blazor.Extensions.Canvas"]
+	path = src/Blazor.Extensions.Canvas
+	url = https://github.com/Blazor-Console/Blazor.Extensions.Canvas.git
+    branch = main
