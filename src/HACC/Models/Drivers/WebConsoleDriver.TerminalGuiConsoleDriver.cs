@@ -1,7 +1,5 @@
 using HACC.Enumerations;
-using HACC.Extensions;
 using HACC.Models.Enums;
-using HACC.Models.EventArgs;
 using HACC.Models.Structs;
 using NStack;
 using Terminal.Gui;
@@ -405,50 +403,50 @@ public partial class WebConsoleDriver
         switch (key)
         {
             case >= ConsoleKey.A and <= ConsoleKey.Z:
-            {
-                var delta = key - ConsoleKey.A;
-                switch (keyInfo.Modifiers)
                 {
-                    case ConsoleModifiers.Control:
-                        return (Key) ((uint) Key.CtrlMask | ((uint) Key.A + delta));
-                    case ConsoleModifiers.Alt:
-                        return (Key) ((uint) Key.AltMask | ((uint) Key.A + delta));
-                }
+                    var delta = key - ConsoleKey.A;
+                    switch (keyInfo.Modifiers)
+                    {
+                        case ConsoleModifiers.Control:
+                            return (Key) ((uint) Key.CtrlMask | ((uint) Key.A + delta));
+                        case ConsoleModifiers.Alt:
+                            return (Key) ((uint) Key.AltMask | ((uint) Key.A + delta));
+                    }
 
-                if ((keyInfo.Modifiers & (ConsoleModifiers.Alt | ConsoleModifiers.Control)) == 0)
+                    if ((keyInfo.Modifiers & (ConsoleModifiers.Alt | ConsoleModifiers.Control)) == 0)
+                        return (Key) keyInfo.KeyChar;
+                    if (keyInfo.KeyChar == 0)
+                        return (Key) ((uint) Key.AltMask | (uint) Key.CtrlMask | ((uint) Key.A + delta));
                     return (Key) keyInfo.KeyChar;
-                if (keyInfo.KeyChar == 0)
-                    return (Key) ((uint) Key.AltMask | (uint) Key.CtrlMask | ((uint) Key.A + delta));
-                return (Key) keyInfo.KeyChar;
-            }
-            case >= ConsoleKey.D0 and <= ConsoleKey.D9:
-            {
-                var delta = key - ConsoleKey.D0;
-                // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
-                switch (keyInfo.Modifiers)
-                {
-                    case ConsoleModifiers.Alt:
-                        return (Key) ((uint) Key.AltMask | ((uint) Key.D0 + delta));
-                    case ConsoleModifiers.Control:
-                        return (Key) ((uint) Key.CtrlMask | ((uint) Key.D0 + delta));
                 }
+            case >= ConsoleKey.D0 and <= ConsoleKey.D9:
+                {
+                    var delta = key - ConsoleKey.D0;
+                    // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+                    switch (keyInfo.Modifiers)
+                    {
+                        case ConsoleModifiers.Alt:
+                            return (Key) ((uint) Key.AltMask | ((uint) Key.D0 + delta));
+                        case ConsoleModifiers.Control:
+                            return (Key) ((uint) Key.CtrlMask | ((uint) Key.D0 + delta));
+                    }
 
-                if (keyInfo.KeyChar == 0 || keyInfo.KeyChar == 30)
-                    return MapKeyModifiers(keyInfo: keyInfo,
-                        key: (Key) ((uint) Key.D0 + delta));
+                    if (keyInfo.KeyChar == 0 || keyInfo.KeyChar == 30)
+                        return MapKeyModifiers(keyInfo: keyInfo,
+                            key: (Key) ((uint) Key.D0 + delta));
 
-                return (Key) keyInfo.KeyChar;
-            }
+                    return (Key) keyInfo.KeyChar;
+                }
             case >= ConsoleKey.F1 and <= ConsoleKey.F12:
-            {
-                var delta = key - ConsoleKey.F1;
-                if ((keyInfo.Modifiers & (ConsoleModifiers.Shift | ConsoleModifiers.Alt | ConsoleModifiers.Control)) !=
-                    0)
-                    return MapKeyModifiers(keyInfo: keyInfo,
-                        key: (Key) ((uint) Key.F1 + delta));
+                {
+                    var delta = key - ConsoleKey.F1;
+                    if ((keyInfo.Modifiers & (ConsoleModifiers.Shift | ConsoleModifiers.Alt | ConsoleModifiers.Control)) !=
+                        0)
+                        return MapKeyModifiers(keyInfo: keyInfo,
+                            key: (Key) ((uint) Key.F1 + delta));
 
-                return (Key) ((uint) Key.F1 + delta);
-            }
+                    return (Key) ((uint) Key.F1 + delta);
+                }
         }
 
         if (keyInfo.KeyChar != 0)
@@ -496,38 +494,38 @@ public partial class WebConsoleDriver
         switch (inputEvent.EventType)
         {
             case EventType.Key:
-            {
-                this._keyModifiers = new KeyModifiers();
-                var map = MapKey(keyInfo: inputEvent.KeyEvent.ConsoleKeyInfo);
-                if (map == (Key) 0xffffffff)
                 {
-                    var key = new KeyEvent();
-
-                    if (inputEvent.KeyEvent.KeyDown)
-                        this._keyDownHandler?.Invoke(obj: key);
-                    else
-                        this._keyUpHandler?.Invoke(obj: key);
-                }
-                else
-                {
-                    if (inputEvent.KeyEvent.KeyDown)
+                    this._keyModifiers = new KeyModifiers();
+                    var map = MapKey(keyInfo: inputEvent.KeyEvent.ConsoleKeyInfo);
+                    if (map == (Key) 0xffffffff)
                     {
-                        this._keyDownHandler?.Invoke(obj: new KeyEvent(k: map,
-                            km: this._keyModifiers));
-                        this._keyHandler?.Invoke(obj: new KeyEvent(k: map,
-                            km: this._keyModifiers));
+                        var key = new KeyEvent();
+
+                        if (inputEvent.KeyEvent.KeyDown)
+                            this._keyDownHandler?.Invoke(obj: key);
+                        else
+                            this._keyUpHandler?.Invoke(obj: key);
                     }
                     else
                     {
-                        this._keyUpHandler?.Invoke(obj: new KeyEvent(k: map,
-                            km: this._keyModifiers));
+                        if (inputEvent.KeyEvent.KeyDown)
+                        {
+                            this._keyDownHandler?.Invoke(obj: new KeyEvent(k: map,
+                                km: this._keyModifiers));
+                            this._keyHandler?.Invoke(obj: new KeyEvent(k: map,
+                                km: this._keyModifiers));
+                        }
+                        else
+                        {
+                            this._keyUpHandler?.Invoke(obj: new KeyEvent(k: map,
+                                km: this._keyModifiers));
+                        }
+
+                        if (!inputEvent.KeyEvent.KeyDown) this._keyModifiers = null;
                     }
 
-                    if (!inputEvent.KeyEvent.KeyDown) this._keyModifiers = null;
+                    break;
                 }
-
-                break;
-            }
             case EventType.Mouse:
                 this._mouseHandler?.Invoke(obj: this.ToDriverMouse(me: inputEvent.MouseEvent));
                 break;
@@ -737,19 +735,19 @@ public partial class WebConsoleDriver
         try
         {
             for (var row = 0; row < this.Rows; row++)
-            for (var c = 0; c < this.Cols; c++)
-            {
-                this.Contents[row,
-                    c,
-                    (int) RuneDataType.Rune] = ' ';
-                this.Contents[row,
-                    c,
-                    (int) RuneDataType.Attribute] = Colors.TopLevel.Normal;
-                this.Contents[row,
-                    c,
-                    (int) RuneDataType.DirtyFlag] = 0;
-                this._dirtyLine[row] = true;
-            }
+                for (var c = 0; c < this.Cols; c++)
+                {
+                    this.Contents[row,
+                        c,
+                        (int) RuneDataType.Rune] = ' ';
+                    this.Contents[row,
+                        c,
+                        (int) RuneDataType.Attribute] = Colors.TopLevel.Normal;
+                    this.Contents[row,
+                        c,
+                        (int) RuneDataType.DirtyFlag] = 0;
+                    this._dirtyLine[row] = true;
+                }
         }
         catch (IndexOutOfRangeException)
         {

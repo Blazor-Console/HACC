@@ -1,7 +1,7 @@
-﻿using System.Text;
-using HACC.Configuration;
+﻿using HACC.Configuration;
 using HACC.Enumerations;
 using Spectre.Console;
+using System.Text;
 
 namespace HACC.Models.Drivers;
 

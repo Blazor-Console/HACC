@@ -34,7 +34,7 @@ public sealed partial class WebConsoleDriver : ConsoleDriver, IAnsiConsole
         this._dirtyLine = new bool[this.BufferRows];
     }
 
-// TODO: resize, etc if terminal settings updated
+    // TODO: resize, etc if terminal settings updated
     public TerminalSettings TerminalSettings { get; private set; }
 
     public Profile Profile => throw new NotImplementedException();

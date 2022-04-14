@@ -1,5 +1,3 @@
-using System.Drawing;
-using System.Globalization;
 using Blazor.Extensions;
 using Blazor.Extensions.Canvas.Canvas2D;
 using Blazor.Extensions.Canvas.Model;
@@ -13,6 +11,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using System.Drawing;
+using System.Globalization;
 
 namespace HACC.Components;
 

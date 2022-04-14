@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using HACC.Models.Enums;
+﻿using HACC.Models.Enums;
+using System.Drawing;
 
 namespace HACC.Models.Structs;
 
