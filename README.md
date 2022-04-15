@@ -11,9 +11,10 @@ C# DotNet 6 HTML ANSI Console Canvas.
   - We absorbed the library, also under MIT license, and brought it up to .net 6 and newer typescript, webpack and other npm libraries.
   - We're about to bring in some of the other impovements other forks had developed but not merged into the stagnant project.  
 
-## Near beta!
+## Beta!
 
-![image](https://user-images.githubusercontent.com/3766240/162670951-a6ee0006-7e9b-44b0-b4c6-6352edb75849.png)
+![image](https://user-images.githubusercontent.com/3766240/163650530-01c3cbf2-d691-4de5-9d47-4771fb886448.png)
+
 
 ## Tests
 
