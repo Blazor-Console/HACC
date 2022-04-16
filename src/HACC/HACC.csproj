@@ -15,13 +15,12 @@
         <RootNamespace>HACC</RootNamespace>
         <AssemblyName>HACC</AssemblyName>
         <OutputType>Library</OutputType>
-       <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeP2POutput</TargetsForTfmSpecificBuildOutput>
        <PackageLicenseExpression>MIT</PackageLicenseExpression>
        <PackageReadmeFile>README.md</PackageReadmeFile>
        <Copyright>Digital Defiance contributors</Copyright>
        <PackageProjectUrl>https://github.com/Blazor-Console/HACC</PackageProjectUrl>
        <RepositoryUrl>https://github.com/Blazor-Console/HACC</RepositoryUrl>
-       <PackageTags>html5 ansi blazor canvas console extensiojs</PackageTags>
+       <PackageTags>html5 ansi blazor canvas console extension js</PackageTags>
        <AssemblyVersion>0.1.1</AssemblyVersion>
     </PropertyGroup>
 
@@ -30,12 +29,6 @@
     <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
     <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
   </PropertyGroup>
-
-  <Target Name="IncludeP2POutput">
-    <ItemGroup>
-      <BuildOutputInPackage Include="../Blazor.Extensions.Canvas/src/Blazor.Extensions.Canvas.JS/$(OutputPath)Blazor.Extensions.Canvas.JS.dll" />
-    </ItemGroup>
-  </Target>
 
   <ItemGroup>
     <None Include="..\..\README.md">
