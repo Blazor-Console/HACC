@@ -170,12 +170,12 @@ public partial class WebConsole : ComponentBase
                 textWidthEm = segment.Column;
             }
 
-            var measuredText = await this.MeasureText(text: segment.Text);
             var letterWidthPx = terminalSettings.FontSizePixels;
             await this._canvas2DContext!.SetFontAsync(
                 value: $"{letterWidthPx}px " +
                        $"{terminalSettings.FontType}");
             await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
+            var measuredText = await this.MeasureText(text: segment.Text);
             await this._canvas2DContext!.SetFillStyleAsync(
                 value: $"{segment.BackgroundColor}");
             await this._canvas2DContext.FillRectAsync(
