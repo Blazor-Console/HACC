@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System.Drawing;
 using System.Globalization;
+using Terminal.Gui;
 
 namespace HACC.Components;
 
@@ -22,8 +23,6 @@ public partial class WebConsole : ComponentBase
     private static readonly ILogger Logger = HaccExtensions.CreateLogger<WebConsole>();
 
     protected readonly string Id = Guid.NewGuid().ToString();
-
-    private readonly Dictionary<string, TextMetrics> MeasuredText = new();
 
     protected BECanvasComponent? _becanvas;
 
@@ -37,6 +36,7 @@ public partial class WebConsole : ComponentBase
     private Queue<InputResult> _inputResultQueue = new();
     private int _screenHeight = 480;
     private int _screenWidth = 640;
+    private bool _firstRender;
 
     [Parameter] public long Height { get; set; }
 
@@ -75,6 +75,8 @@ public partial class WebConsole : ComponentBase
         {
             Logger.LogDebug(message: "OnAfterRenderAsync");
 
+            _firstRender = firstRender;
+
             _canvas2DContext = await _becanvas.CreateCanvas2DAsync();
 
             var thisObject = DotNetObjectReference.Create(value: this);
@@ -89,6 +91,7 @@ public partial class WebConsole : ComponentBase
                 thisObject);
 
             await this.OnLoaded.InvokeAsync();
+            this.OnReadConsoleInput();
 
             Logger.LogDebug(message: "OnAfterRenderAsync: end");
         }
@@ -102,19 +105,13 @@ public partial class WebConsole : ComponentBase
         return await JsInterop!.InvokeAsync<object>(identifier: "canvasToPng");
     }
 
-
-    public async Task<TextMetrics?> MeasureText(string text)
+    public async Task<int?> MeasureText(string text,
+        int fontSpacePixels)
     {
         if (!this.CanvasInitialized) return null;
-        if (this.MeasuredText.ContainsKey(key: text))
-            return this.MeasuredText[key: text];
+        var result = await Task.Run(() => TextFormatter.GetTextWidth(text));
 
-        var result = await this._canvas2DContext!.MeasureTextAsync(text: text);
-
-        this.MeasuredText.Add(
-            key: text,
-            value: result!);
-        return result;
+        return result * fontSpacePixels;
     }
 
     private async Task RedrawCanvas()
@@ -160,38 +157,59 @@ public partial class WebConsole : ComponentBase
 
         Logger.LogDebug(message: "DrawBufferToFrame");
         var lastRow = segments[index: 0].Row;
-        double textWidthEm = segments[index: 0].Column;
+        var textWidthEm = segments[index: 0].Column;
 
-        foreach (var segment in segments)
+        try
         {
-            if (segment.Row != lastRow)
+            foreach (var segment in segments)
             {
-                lastRow = segment.Row;
-                textWidthEm = segment.Column;
+                if (segment.Row != lastRow)
+                {
+                    lastRow = segment.Row;
+                    textWidthEm = segment.Column;
+                }
+                textWidthEm = Math.Max(textWidthEm, segment.Column * terminalSettings.FontSpacePixels);
+
+                var letterWidthPx = terminalSettings.FontSizePixels;
+                await this._canvas2DContext!.SetFontAsync(
+                    value: $"{letterWidthPx}px " +
+                           $"{terminalSettings.FontType}");
+                await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
+                var measuredText = await this.MeasureText(text: segment.Text,
+                    fontSpacePixels: terminalSettings.FontSpacePixels);
+                await this._canvas2DContext!.SetFillStyleAsync(
+                    value: $"{segment.BackgroundColor}");
+                await this._canvas2DContext.FillRectAsync(
+                    x: textWidthEm,
+                    y: segment.Row * letterWidthPx,
+                    width: (double) measuredText,
+                    height: letterWidthPx);
+                await this._canvas2DContext!.SetStrokeStyleAsync(
+                    value: $"{segment.ForegroundColor}");
+                await this._canvas2DContext.StrokeTextAsync(text: segment.Text,
+                    x: textWidthEm,
+                    y: segment.Row * letterWidthPx,
+                    maxWidth: (double) measuredText);
+
+                textWidthEm += (int) measuredText;
             }
+            if (_firstRender)
+            {
 
-            var letterWidthPx = terminalSettings.FontSizePixels;
-            await this._canvas2DContext!.SetFontAsync(
-                value: $"{letterWidthPx}px " +
-                       $"{terminalSettings.FontType}");
-            await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
-            var measuredText = await this.MeasureText(text: segment.Text);
-            await this._canvas2DContext!.SetFillStyleAsync(
-                value: $"{segment.BackgroundColor}");
-            await this._canvas2DContext.FillRectAsync(
-                x: textWidthEm,
-                y: segment.Row * letterWidthPx,
-                width: segment.Text.Length * measuredText!.Width,
-                height: letterWidthPx);
-            await this._canvas2DContext!.SetStrokeStyleAsync(
-                value: $"{segment.ForegroundColor}");
-            await this._canvas2DContext.StrokeTextAsync(text: segment.Text,
-                x: textWidthEm,
-                y: segment.Row * letterWidthPx);
 
-            textWidthEm += measuredText!.Width;
+                //this.StateHasChanged();
+                //await this._canvas2DContext!.FillRectAsync(0, 0, 640, 480);
+                //_ = this._canvas2DContext!.ClearRectAsync(0, 0, 640, 480);
+                //_ = this._canvas2DContext.BeginPathAsync();
+                //this.OnReadConsoleInput();
+                _firstRender = false;
+            }
         }
+        catch (Exception ex)
+        {
 
+            throw;
+        }
         Logger.LogDebug(message: "DrawBufferToFrame: end");
     }
 
@@ -233,10 +251,16 @@ public partial class WebConsole : ComponentBase
         // ReSharper restore HeapView.ObjectAllocation
     }
 
-    private void OnReadConsoleInput(InputResult inputResult)
+    private void OnReadConsoleInput()
     {
-        this.ReadConsoleInput?.Invoke(obj: inputResult);
-        this.RunIterationNeeded?.Invoke();
+        if (this.ReadConsoleInput == null)
+            return;
+
+        while (_inputResultQueue.Count > 0)
+        {
+            this.ReadConsoleInput?.Invoke(obj: _inputResultQueue.Dequeue());
+            this.RunIterationNeeded?.Invoke();
+        }
     }
 
     [JSInvokable]
@@ -251,7 +275,8 @@ public partial class WebConsole : ComponentBase
                 ButtonState = MouseButtonState.Button1Clicked,
             },
         };
-        this.OnReadConsoleInput(inputResult: inputResult);
+        this._inputResultQueue.Enqueue(inputResult);
+        this.OnReadConsoleInput();
         // no-op await to keep compiler happy
         await Task.Run(() =>
         {
@@ -306,11 +331,12 @@ public partial class WebConsole : ComponentBase
             EventType = EventType.Resize,
             ResizeEvent = new ResizeEvent
             {
-                Size = new Size(width: screenWidth,
+                Size = new System.Drawing.Size(width: screenWidth,
                     height: screenHeight),
             },
         };
-        this.OnReadConsoleInput(inputResult: inputResult);
+        this._inputResultQueue.Enqueue(item: inputResult);
+        this.OnReadConsoleInput();
         return ValueTask.CompletedTask;
     }
 

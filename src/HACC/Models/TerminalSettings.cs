@@ -51,6 +51,11 @@ public record TerminalSettings
     public int FontSizePixels;
 
     /// <summary>
+    ///     Terminal font space in pixels
+    /// </summary>
+    public int FontSpacePixels;
+
+    /// <summary>
     ///     Terminal font type
     /// </summary>
     public string FontType;
@@ -118,6 +123,7 @@ public record TerminalSettings
         ConsoleColor terminalBackground = Defaults.BackgroundColor,
         ConsoleColor terminalForeground = Defaults.ForegroundColor,
         int fontSizePixels = Defaults.FontSize,
+        int fontSpacePixels = Defaults.FontSpace,
         string fontType = Defaults.FontType)
     {
         this.Title = title;
@@ -139,6 +145,7 @@ public record TerminalSettings
         this.TerminalBackground = terminalBackground;
         this.TerminalForeground = terminalForeground;
         this.FontSizePixels = fontSizePixels;
+        this.FontSpacePixels = fontSpacePixels;
         this.FontType = fontType;
     }
 

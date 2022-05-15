@@ -69,12 +69,30 @@ public partial class WebConsoleDriver
         if (this.Contents.Length != this.Rows * this.Cols * 3) return;
         rune = MakePrintable(c: rune);
         var runeWidth = Rune.ColumnWidth(rune: rune);
-        if (this.Clip.Contains(x: this.ccol,
-                y: this.crow)
-            && this.ccol + Math.Max(val1: runeWidth,
-                val2: 1) <= this.Cols)
+        var validClip = IsValidContent(col: ccol, row: crow, clip: Clip);
+
+        if (validClip)
         {
-            this.Contents[this.crow,
+            if (runeWidth < 2 && this.ccol > 0
+                && Rune.ColumnWidth((char) this.Contents[this.crow, this.ccol - 1, (int) RuneDataType.Rune]) > 1)
+            {
+
+                this.Contents[this.crow, this.ccol - 1, (int) RuneDataType.Rune] = (int) (uint) ' ';
+
+            }
+            else if (runeWidth < 2 && this.ccol <= this.Clip.Right - 1
+              && Rune.ColumnWidth((char) this.Contents[this.crow, this.ccol, (int) RuneDataType.Rune]) > 1)
+            {
+
+                this.Contents[this.crow, this.ccol + 1, (int) RuneDataType.Rune] = (int) (uint) ' ';
+                this.Contents[this.crow, this.ccol + 1, (int) RuneDataType.DirtyFlag] = 1;
+            }
+            if (runeWidth > 1 && this.ccol == this.Clip.Right - 1)
+                this.Contents[this.crow,
+                this.ccol,
+                (int) RuneDataType.Rune] = (int) (uint) ' ';
+            else
+                this.Contents[this.crow,
                 this.ccol,
                 (int) RuneDataType.Rune] = (int) (uint) rune;
             this.Contents[this.crow,
@@ -85,27 +103,21 @@ public partial class WebConsoleDriver
                 (int) RuneDataType.DirtyFlag] = 1;
             this._dirtyLine[this.crow] = true;
         }
-        else if (this.ccol > -1 && this.crow > -1
-                                && this.ccol < this.Cols && this.crow < this.Rows)
-        {
-            this.Contents[this.crow,
-                this.ccol,
-                (int) RuneDataType.DirtyFlag] = 1;
-            this._dirtyLine[this.crow] = true;
-        }
 
         this.ccol++;
         if (runeWidth > 1)
-            for (var i = 1; i < runeWidth; i++)
+        {
+            if (validClip && this.ccol < this.Clip.Right)
             {
-                if (this.ccol < this.Cols)
-                    this.Contents[this.crow,
-                        this.ccol,
-                        (int) RuneDataType.DirtyFlag] = 0;
-                else
-                    break;
-                this.ccol++;
+                this.Contents[this.crow,
+                    this.ccol,
+                    (int) RuneDataType.Attribute] = this._currentAttribute;
+                this.Contents[this.crow,
+                    this.ccol,
+                    (int) RuneDataType.DirtyFlag] = 0;
             }
+            this.ccol++;
+        }
 
         //if (ccol == Cols) {
         //	ccol = 0;
@@ -241,9 +253,9 @@ public partial class WebConsoleDriver
     {
         if (this.firstRender) return;
 
-        var dirtySegments = new List<DirtySegment>();
         lock (this.Contents)
         {
+            var dirtySegments = new List<DirtySegment>();
             var output = new System.Text.StringBuilder();
             var top = this.Top;
             var left = this.Left;
@@ -255,14 +267,38 @@ public partial class WebConsoleDriver
             {
                 if (!this._dirtyLine[row]) continue;
                 this._dirtyLine[row] = false;
-                var segmentStart = left;
+                var segmentStart = -1;
+                var outputWidth = 0;
                 for (var col = left; col < cols; col++)
                 {
                     // no dirty flag here continue
-                    if (this.Contents[row,
+                    if (col > 0 && this.Contents[row,
                             col,
-                            (int) RuneDataType.DirtyFlag] != 1)
+                            (int) RuneDataType.DirtyFlag] == 0)
+                    {
+                        if (output.Length > 0)
+                        {
+                            dirtySegments.Add(item: new DirtySegment(
+                                BackgroundColor: this.TerminalSettings.TerminalBackground,
+                                ForegroundColor: this.TerminalSettings.TerminalForeground,
+                                Row: row,
+                                Column: segmentStart,
+                                Text: output.ToString()));
+                            output.Clear();
+                            segmentStart += outputWidth;
+                            outputWidth = 0;
+                        }
+                        else if (segmentStart == -1)
+                        {
+                            segmentStart = col;
+                        }
+                        if (segmentStart + 1 < cols)
+                            segmentStart++;
                         continue;
+                    }
+
+                    if (segmentStart == -1)
+                        segmentStart = col;
 
                     // get color at current position
                     var color = this.Contents[
@@ -280,15 +316,14 @@ public partial class WebConsoleDriver
                                 Row: row,
                                 Column: segmentStart,
                                 Text: output.ToString()));
-                        segmentStart = col;
                         output.Clear();
+                        segmentStart += outputWidth;
+                        outputWidth = 0;
                         this.SetColor(color: color);
                     }
-
+                    outputWidth++;
                     // append to buffer
-                    output.Append(value: (char) this.Contents[row,
-                        col,
-                        (int) RuneDataType.Rune]);
+                    output.Append(value: (char) this.Contents[row, col, (int) RuneDataType.Rune]);
 
                     // clear the flag
                     this.Contents[row,
@@ -530,9 +565,12 @@ public partial class WebConsoleDriver
                 this._mouseHandler?.Invoke(obj: this.ToDriverMouse(me: inputEvent.MouseEvent));
                 break;
             case EventType.Resize:
-                this.TerminalSettings.WindowColumns = this.TerminalSettings.BufferColumns =
-                    inputEvent.ResizeEvent.Size.Width / this.TerminalSettings.FontSizePixels;
-                this.TerminalSettings.WindowRows = this.TerminalSettings.BufferRows =
+                this.WindowWidthPixels = inputEvent.ResizeEvent.Size.Width;
+                this.WindowHeightPixels = inputEvent.ResizeEvent.Size.Height;
+                this.WindowColumns = this.BufferColumns =
+                    (int) (inputEvent.ResizeEvent.Size.Width / this.TerminalSettings.FontSpacePixels
+                    - (this.TerminalSettings.FontSpacePixels / 2));
+                this.WindowRows = this.BufferRows =
                     inputEvent.ResizeEvent.Size.Height / this.TerminalSettings.FontSizePixels;
                 this.ProcessResize();
                 break;
@@ -724,13 +762,13 @@ public partial class WebConsoleDriver
             y: 0,
             width: this.Cols,
             height: this.Rows);
-
-        this.Contents = new int[this.Rows, this.Cols, 3];
-        this._dirtyLine = new bool[this.Rows];
     }
 
-    private void UpdateOffScreen()
+    public override void UpdateOffScreen()
     {
+        this.Contents = new int[this.Rows, this.Cols, 3];
+        this._dirtyLine = new bool[this.Rows];
+
         // Can raise an exception while is still resizing.
         try
         {

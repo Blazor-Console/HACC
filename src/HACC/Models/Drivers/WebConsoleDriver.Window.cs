@@ -34,11 +34,10 @@ public partial class WebConsoleDriver
     //     The set operation is invoked on an operating system other than Windows.
     public int BufferRows
     {
-        get => this.TerminalSettings.WindowRows;
+        get => this.TerminalSettings.BufferRows;
         set
         {
-            this.TerminalSettings.WindowRows = value;
-            this.TerminalResized?.Invoke();
+            this.TerminalSettings.BufferRows = value;
         }
     }
 
@@ -65,11 +64,10 @@ public partial class WebConsoleDriver
     //     The set operation is invoked on an operating system other than Windows.
     public int BufferColumns
     {
-        get => this.TerminalSettings.WindowColumns;
+        get => this.TerminalSettings.BufferColumns;
         set
         {
-            this.TerminalSettings.WindowColumns = value;
-            this.TerminalResized?.Invoke();
+            this.TerminalSettings.BufferColumns = value;
         }
     }
 

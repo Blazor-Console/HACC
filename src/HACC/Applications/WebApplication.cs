@@ -28,6 +28,8 @@ public class WebApplication
 
     private void WebConsole_RunIterationNeeded()
     {
+        if (this.state == null) return;
+
         var firstIteration = false;
         Application.RunIteration(state: ref this.state,
             wait: this.wait,
@@ -75,13 +77,12 @@ public class WebApplication
         {
             if (!this._initialized) this.Init();
 
-            _ = Task.Run(function: () => this.state = Application.Begin(toplevel: view ?? Application.Top));
-            _ = Task.Run(function: () => this.WebConsoleDriver.firstRender = false);
-            _ = Task.Run(action: Application.Refresh);
+            this.state = Application.Begin(toplevel: view ?? Application.Top);
+            this.WebConsoleDriver.firstRender = false;
             var firstIteration = true;
-            _ = Task.Run(action: () => Application.RunIteration(state: ref this.state,
+            Application.RunIteration(state: ref this.state,
                 wait: this.wait,
-                firstIteration: ref firstIteration));
+                firstIteration: ref firstIteration);
         }
         catch (Exception error) when (errorHandler != null)
         {

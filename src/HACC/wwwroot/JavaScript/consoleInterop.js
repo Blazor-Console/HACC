@@ -15,10 +15,13 @@ function onResize() {
     if (!window.console.canvas)
         return;
 
-    console.canvas.width = window.innerWidth;
-    console.canvas.height = window.innerHeight;
+    var canvasContainer = document.getElementById('_divCanvas');
+    if (canvasContainer) {
+        console.canvas.width = canvasContainer.offsetWidth - canvasContainer.offsetLeft;
+        console.canvas.height = canvasContainer.offsetHeight - canvasContainer.offsetTop;
 
-    console.instance.invokeMethodAsync('OnResize', console.canvas.width, console.canvas.height);
+        console.instance.invokeMethodAsync('OnResize', console.canvas.width, console.canvas.height);
+    }
 }
 
 function onFocus() {
@@ -47,7 +50,7 @@ window.consoleWindowBeforeUnload = (instance) => {
     onBeforeUnload();
 }
 
-window.canvasToPng = () =>{
+window.canvasToPng = () => {
     return window.console.canvas.toDataURL("image/png");
 };
 
