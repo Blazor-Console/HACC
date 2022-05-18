@@ -57,6 +57,9 @@ window.canvasToPng = () => {
 window.initConsole = (instance) => {
     var canvasContainer = document.getElementById('_divCanvas'),
         canvases = canvasContainer.getElementsByTagName('canvas') || [];
+    canvasContainer.oncontextmenu = function () {
+        return false;
+    }
     window.consoleJs = {
         instance: instance,
         canvas: canvases.length ? canvases[0] : null
