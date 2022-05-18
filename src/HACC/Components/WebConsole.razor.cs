@@ -299,11 +299,11 @@ public partial class WebConsole : ComponentBase
         }
         mouseEvent.ButtonState = buttonState;
         var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
-        if (me.ClientX > terminalSettings.WindowWidthPixels
-            || me.ClientY > terminalSettings.WindowHeightPixels)
+        if (me.OffsetX > terminalSettings.WindowWidthPixels
+            || me.OffsetY > terminalSettings.WindowHeightPixels)
             return false;
-        mouseEvent.Position.X = (int) me.ClientX / terminalSettings.FontSpacePixels;
-        mouseEvent.Position.Y = (int) me.ClientY / terminalSettings.FontSizePixels;
+        mouseEvent.Position.X = (int) me.OffsetX / terminalSettings.FontSpacePixels;
+        mouseEvent.Position.Y = (int) me.OffsetY / terminalSettings.FontSizePixels;
         return true;
 
         MouseButtonState GetButtonPressed()
@@ -363,11 +363,11 @@ public partial class WebConsole : ComponentBase
         }
         mouseEvent.ButtonState = buttonState;
         var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
-        if (we.ClientX > terminalSettings.WindowWidthPixels
-            || we.ClientY > terminalSettings.WindowHeightPixels)
+        if (we.OffsetX > terminalSettings.WindowWidthPixels
+            || we.OffsetY > terminalSettings.WindowHeightPixels)
             return false;
-        mouseEvent.Position.X = (int) we.ClientX / terminalSettings.FontSpacePixels;
-        mouseEvent.Position.Y = (int) we.ClientY / terminalSettings.FontSizePixels;
+        mouseEvent.Position.X = (int) we.OffsetX / terminalSettings.FontSpacePixels;
+        mouseEvent.Position.Y = (int) we.OffsetY / terminalSettings.FontSizePixels;
         return true; ;
 
         MouseButtonState GetWheelDeltaX()
