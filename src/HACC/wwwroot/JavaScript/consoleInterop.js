@@ -1,5 +1,5 @@
 function canvasHasFocus() {
-    if (!window.console.canvas)
+    if (!window.consoleJs.canvas)
         return false;
 
     const elem = document.querySelector('canvas');
@@ -12,30 +12,30 @@ function canvasHasFocus() {
 }
 
 function onResize() {
-    if (!window.console.canvas)
+    if (!window.consoleJs.canvas)
         return;
 
     var canvasContainer = document.getElementById('_divCanvas');
     if (canvasContainer) {
-        console.canvas.width = canvasContainer.offsetWidth - canvasContainer.offsetLeft;
-        console.canvas.height = canvasContainer.offsetHeight - canvasContainer.offsetTop;
+        window.consoleJs.canvas.width = canvasContainer.offsetWidth - canvasContainer.offsetLeft;
+        window.consoleJs.canvas.height = canvasContainer.offsetHeight - canvasContainer.offsetTop;
 
-        console.instance.invokeMethodAsync('OnResize', console.canvas.width, console.canvas.height);
+        window.consoleJs.instance.invokeMethodAsync('OnResize', window.consoleJs.canvas.width, window.consoleJs.canvas.height);
     }
 }
 
 function onFocus() {
-    if (!window.console.canvas)
+    if (!window.consoleJs.canvas)
         return;
 
-    console.instance.invokeMethodAsync('OnFocus');
+    window.consoleJs.instance.invokeMethodAsync('OnFocus');
 }
 
 function onBeforeUnload() {
-    if (!window.console.canvas)
+    if (!window.consoleJs.canvas)
         return;
 
-    console.instance.invokeMethodAsync('OnBeforeUnload');
+    window.consoleJs.instance.invokeMethodAsync('OnBeforeUnload');
 }
 
 window.consoleWindowResize = (instance) => {
@@ -51,62 +51,62 @@ window.consoleWindowBeforeUnload = (instance) => {
 }
 
 window.canvasToPng = () => {
-    return window.console.canvas.toDataURL("image/png");
+    return window.consoleJs.canvas.toDataURL("image/png");
 };
 
 window.initConsole = (instance) => {
     var canvasContainer = document.getElementById('_divCanvas'),
         canvases = canvasContainer.getElementsByTagName('canvas') || [];
-    window.console = {
+    window.consoleJs = {
         instance: instance,
         canvas: canvases.length ? canvases[0] : null
     };
 
-    if (window.console.canvas) {
-        window.console.canvas.onmousemove = (e) => {
+    if (window.consoleJs.canvas) {
+        window.consoleJs.canvas.onmousemove = (e) => {
             if (!canvasHasFocus)
                 return;
             var me = getMouseEvent(e);
-            console.instance.invokeMethodAsync('OnCanvasMouse', me);
+            window.consoleJs.instance.invokeMethodAsync('OnCanvasMouse', me);
         };
-        window.console.canvas.onmousedown = (e) => {
+        window.consoleJs.canvas.onmousedown = (e) => {
             if (!canvasHasFocus)
                 return;
             var me = getMouseEvent(e);
-            console.instance.invokeMethodAsync('OnCanvasMouse', me);
+            window.consoleJs.instance.invokeMethodAsync('OnCanvasMouse', me);
         };
-        window.console.canvas.onmouseup = (e) => {
+        window.consoleJs.canvas.onmouseup = (e) => {
             if (!canvasHasFocus)
                 return;
             var me = getMouseEvent(e);
-            console.instance.invokeMethodAsync('OnCanvasMouse', me);
+            window.consoleJs.instance.invokeMethodAsync('OnCanvasMouse', me);
         };
-        window.console.canvas.onmousewheel = (e) => {
+        window.consoleJs.canvas.onmousewheel = (e) => {
             if (!canvasHasFocus)
                 return;
             var we = getWheelEvent(e);
-            console.instance.invokeMethodAsync('OnCanvasWheel', we);
+            window.consoleJs.instance.invokeMethodAsync('OnCanvasWheel', we);
         };
 
-        window.console.canvas.onkeydown = (e) => {
+        window.consoleJs.canvas.onkeydown = (e) => {
             if (!canvasHasFocus)
                 return;
             var ke = getKeyEvent(e);
-            console.instance.invokeMethodAsync('OnCanvasKey', ke);
+            window.consoleJs.instance.invokeMethodAsync('OnCanvasKey', ke);
         };
-        window.console.canvas.onkeyup = (e) => {
+        window.consoleJs.canvas.onkeyup = (e) => {
             if (!canvasHasFocus)
                 return;
             var ke = getKeyEvent(e);
-            console.instance.invokeMethodAsync('OnCanvasKey', ke);
+            window.consoleJs.instance.invokeMethodAsync('OnCanvasKey', ke);
         };
-        window.console.canvas.onblur = (e) => {
+        window.consoleJs.canvas.onblur = (e) => {
             if (!canvasHasFocus)
                 return;
-            window.console.canvas.focus();
+            window.consoleJs.canvas.focus();
         };
-        window.console.canvas.tabIndex = 0;
-        window.console.canvas.focus();
+        window.consoleJs.canvas.tabIndex = 0;
+        window.consoleJs.canvas.focus();
     }
 
     window.addEventListener("resize", onResize);
