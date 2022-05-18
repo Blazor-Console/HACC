@@ -264,75 +264,179 @@ public partial class WebConsole : ComponentBase
     }
 
     [JSInvokable]
-    public async Task OnCanvasClick(MouseEventArgs obj)
+    public ValueTask OnCanvasMouse(MouseEventArgs obj)
     {
+        if (!this.GetMouseEvent(obj, out WebMouseEvent me))
+            return ValueTask.CompletedTask;
         // of relevance: ActiveConsole
         var inputResult = new InputResult
         {
             EventType = EventType.Mouse,
-            MouseEvent = new WebMouseEvent
+            MouseEvent = me
+        };
+        this._inputResultQueue.Enqueue(inputResult);
+        this.OnReadConsoleInput();
+        return ValueTask.FromCanceled(new CancellationToken(true));
+    }
+
+    private bool GetMouseEvent(MouseEventArgs me, out WebMouseEvent mouseEvent)
+    {
+        mouseEvent = new WebMouseEvent();
+        MouseButtonState buttonState;
+        switch (me.Type)
+        {
+            case "mousedown":
+                buttonState = GetButtonPressed();
+                break;
+            case "mouseup":
+                buttonState = GetButtonReleased();
+                break;
+            case "mousemove":
+                buttonState = MouseButtonState.ReportMousePosition;
+                break;
+            default:
+                return false;
+        }
+        mouseEvent.ButtonState = buttonState;
+        var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
+        if (me.ClientX > terminalSettings.WindowWidthPixels
+            || me.ClientY > terminalSettings.WindowHeightPixels)
+            return false;
+        mouseEvent.Position.X = (int) me.ClientX / terminalSettings.FontSpacePixels;
+        mouseEvent.Position.Y = (int) me.ClientY / terminalSettings.FontSizePixels;
+        return true;
+
+        MouseButtonState GetButtonPressed()
+        {
+            return me.Button switch
             {
-                ButtonState = MouseButtonState.Button1Clicked,
+                0 => MouseButtonState.Button1Pressed,
+                1 => MouseButtonState.Button2Pressed,
+                2 => MouseButtonState.Button3Pressed,
+                3 => MouseButtonState.Button4Pressed,
+            };
+        }
+
+        MouseButtonState GetButtonReleased()
+        {
+            return me.Button switch
+            {
+                0 => MouseButtonState.Button1Released,
+                1 => MouseButtonState.Button2Released,
+                2 => MouseButtonState.Button3Released,
+                3 => MouseButtonState.Button4Released,
+            };
+        }
+    }
+
+    [JSInvokable]
+    public ValueTask OnCanvasWheel(WheelEventArgs obj)
+    {
+        if (!this.GetWheelEvent(obj, out WebMouseEvent me))
+            return ValueTask.CompletedTask;
+        var inputResult = new InputResult
+        {
+            EventType = EventType.Mouse,
+            MouseEvent = me
+        };
+        this._inputResultQueue.Enqueue(inputResult);
+        this.OnReadConsoleInput();
+        return ValueTask.FromCanceled(new CancellationToken(true));
+    }
+
+    private bool GetWheelEvent(WheelEventArgs we, out WebMouseEvent mouseEvent)
+    {
+        mouseEvent = new WebMouseEvent();
+        MouseButtonState buttonState;
+        switch (we.Type)
+        {
+            case "mousewheel":
+                if (we.DeltaX != 0)
+                    buttonState = GetWheelDeltaX();
+                else if (we.DeltaY != 0)
+                    buttonState = GetWheelDeltaY();
+                else
+                    return false;
+                break;
+            default:
+                return false;
+        }
+        mouseEvent.ButtonState = buttonState;
+        var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
+        if (we.ClientX > terminalSettings.WindowWidthPixels
+            || we.ClientY > terminalSettings.WindowHeightPixels)
+            return false;
+        mouseEvent.Position.X = (int)we.ClientX / terminalSettings.FontSpacePixels;
+        mouseEvent.Position.Y = (int)we.ClientY / terminalSettings.FontSizePixels;
+        return true; ;
+
+        MouseButtonState GetWheelDeltaX()
+        {
+            return we.DeltaX switch
+            {
+                > 0 => MouseButtonState.ButtonWheeledRight,
+                _ => MouseButtonState.ButtonWheeledLeft,
+            };
+        }
+
+        MouseButtonState GetWheelDeltaY()
+        {
+            return we.DeltaY switch
+            {
+                > 0 => MouseButtonState.ButtonWheeledDown,
+                _ => MouseButtonState.ButtonWheeledUp,
+            };
+        }
+    }
+
+    [JSInvokable]
+    public ValueTask OnCanvasKey(KeyboardEventArgs obj)
+    {
+        var inputResult = new InputResult
+        {
+            EventType = EventType.Key,
+            KeyEvent = new WebKeyEvent
+            {
+                KeyDown = true,
             },
         };
         this._inputResultQueue.Enqueue(inputResult);
         this.OnReadConsoleInput();
-        // no-op await to keep compiler happy
-        await Task.Run(() =>
-        {
-
-        });
+        return ValueTask.CompletedTask;
     }
 
     [JSInvokable]
-    public async Task OnCanvasKeyDown(KeyboardEventArgs obj)
+    public ValueTask OnCanvasKeyDown(KeyboardEventArgs obj)
     {
-        // no-op await to keep compiler happy
-        await Task.Run(() =>
-        {
-
-        });
-        // of relevance: ActiveConsole
-        throw new NotImplementedException();
+        return ValueTask.CompletedTask;
     }
 
     [JSInvokable]
-    public async Task OnCanvasKeyUp(KeyboardEventArgs obj)
+    public ValueTask OnCanvasKeyUp(KeyboardEventArgs obj)
     {
-        // no-op await to keep compiler happy
-        await Task.Run(() =>
-        {
-
-        });
-        // of relevance: ActiveConsole
-        throw new NotImplementedException();
+        return ValueTask.CompletedTask;
     }
 
     [JSInvokable]
-    public async Task OnCanvasKeyPress(KeyboardEventArgs arg)
+    public ValueTask OnCanvasKeyPress(KeyboardEventArgs arg)
     {
-        // no-op await to keep compiler happy
-        await Task.Run(() =>
-        {
-
-        });
-        // of relevance: ActiveConsole
-        throw new NotImplementedException();
+        return ValueTask.CompletedTask;
     }
 
     [JSInvokable]
     public ValueTask OnResize(int screenWidth, int screenHeight)
     {
         if (this._canvas2DContext == null) return ValueTask.CompletedTask;
-        this._screenWidth = screenWidth;
-        this._screenHeight = screenHeight;
+        var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
+        this._screenWidth = screenWidth - terminalSettings.FontSpacePixels * 3;
+        this._screenHeight = screenHeight - terminalSettings.FontSizePixels / 2;
         var inputResult = new InputResult
         {
             EventType = EventType.Resize,
             ResizeEvent = new ResizeEvent
             {
-                Size = new System.Drawing.Size(width: screenWidth,
-                    height: screenHeight),
+                Size = new System.Drawing.Size(width: this._screenWidth,
+                    height: this._screenHeight),
             },
         };
         this._inputResultQueue.Enqueue(item: inputResult);

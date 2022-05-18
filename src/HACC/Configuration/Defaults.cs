@@ -1,4 +1,4 @@
-﻿using HACC.Enumerations;
+using HACC.Enumerations;
 
 namespace HACC.Configuration;
 
