@@ -568,9 +568,9 @@ public partial class WebConsoleDriver
                 this.WindowWidthPixels = inputEvent.ResizeEvent.Size.Width;
                 this.WindowHeightPixels = inputEvent.ResizeEvent.Size.Height;
                 this.WindowColumns = this.BufferColumns =
-                    inputEvent.ResizeEvent.Size.Width / this.TerminalSettings.FontSpacePixels;
+                    this.WindowWidthPixels / this.TerminalSettings.FontSpacePixels;
                 this.WindowRows = this.BufferRows =
-                    inputEvent.ResizeEvent.Size.Height / this.TerminalSettings.FontSizePixels;
+                    this.WindowHeightPixels / this.TerminalSettings.FontSizePixels;
                 this.ProcessResize();
                 break;
         }

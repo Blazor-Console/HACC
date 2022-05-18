@@ -366,8 +366,8 @@ public partial class WebConsole : ComponentBase
         if (we.ClientX > terminalSettings.WindowWidthPixels
             || we.ClientY > terminalSettings.WindowHeightPixels)
             return false;
-        mouseEvent.Position.X = (int)we.ClientX / terminalSettings.FontSpacePixels;
-        mouseEvent.Position.Y = (int)we.ClientY / terminalSettings.FontSizePixels;
+        mouseEvent.Position.X = (int) we.ClientX / terminalSettings.FontSpacePixels;
+        mouseEvent.Position.Y = (int) we.ClientY / terminalSettings.FontSizePixels;
         return true; ;
 
         MouseButtonState GetWheelDeltaX()
@@ -428,8 +428,12 @@ public partial class WebConsole : ComponentBase
     {
         if (this._canvas2DContext == null) return ValueTask.CompletedTask;
         var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
-        this._screenWidth = screenWidth - terminalSettings.FontSpacePixels * 3;
-        this._screenHeight = screenHeight - terminalSettings.FontSizePixels / 2;
+        var sw = screenWidth - terminalSettings.FontSpacePixels * 3;
+        this._screenWidth = sw / terminalSettings.FontSpacePixels * terminalSettings.FontSpacePixels;
+        var sh = screenHeight - terminalSettings.FontSizePixels / 2;
+        this._screenHeight = sh / terminalSettings.FontSizePixels * terminalSettings.FontSizePixels;
+        this._becanvas!.SetCanvasSizeAsync(this._screenWidth, this._screenHeight);
+        this.InvokeAsync(StateHasChanged);
         var inputResult = new InputResult
         {
             EventType = EventType.Resize,
