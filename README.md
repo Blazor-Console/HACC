@@ -12,11 +12,12 @@ C# DotNet 6 HTML ANSI Console Canvas.
   - We're about to bring in some of the other impovements other forks had developed but not merged into the stagnant project.  
 
 ## Beta!
+![Right Click works!](https://user-images.githubusercontent.com/3766240/169219917-215267bc-87c1-4323-a3ca-321c6875240a.png)
 
-![paste](https://user-images.githubusercontent.com/3766240/169147268-74747bad-9114-4106-a226-da22f2017356.png)
 
 
 ## Tests
+
 
 - https://github.com/Blazor-Console/HACC.Tests
 
