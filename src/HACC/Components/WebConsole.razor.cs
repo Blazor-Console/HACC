@@ -459,35 +459,117 @@ public partial class WebConsole : ComponentBase
     [JSInvokable]
     public ValueTask OnCanvasKey(KeyboardEventArgs obj)
     {
+        Console.WriteLine($"{obj.Code};{obj.Key}");
+        var consoleKey = MapKeyboardEventArgsCode(obj.Code);
+        var keyChar = MapKeyboardEventArgsKey(obj.Key, ref consoleKey);
         var inputResult = new InputResult
         {
             EventType = EventType.Key,
             KeyEvent = new WebKeyEvent
             {
-                KeyDown = true,
-            },
+                KeyDown = GetKeyType(obj.Type),
+                ConsoleKeyInfo = new ConsoleKeyInfo(keyChar, consoleKey,
+                    obj.ShiftKey, obj.AltKey, obj.CtrlKey)
+            }
         };
         this._inputResultQueue.Enqueue(inputResult);
         this.OnReadConsoleInput();
         return ValueTask.CompletedTask;
     }
 
-    [JSInvokable]
-    public ValueTask OnCanvasKeyDown(KeyboardEventArgs obj)
+    private bool GetKeyType(string type)
     {
-        return ValueTask.CompletedTask;
+        return type switch
+        {
+            "keydown" => true,
+            _ => false
+        };
     }
 
-    [JSInvokable]
-    public ValueTask OnCanvasKeyUp(KeyboardEventArgs obj)
+    private char MapKeyboardEventArgsKey(string key, ref ConsoleKey consoleKey)
     {
-        return ValueTask.CompletedTask;
+        switch (key)
+        {
+            case var k when k.Length == 1:
+                return key[0];
+            case "Home":
+                consoleKey = ConsoleKey.Home;
+                return '\0';
+            case "End":
+                consoleKey = ConsoleKey.End;
+                return '\0';
+            case "PageDown":
+                consoleKey = ConsoleKey.PageDown;
+                return '\0';
+            case "PageUp":
+                consoleKey = ConsoleKey.PageUp;
+                return '\0';
+            case "ArrowLeft":
+                consoleKey = ConsoleKey.LeftArrow;
+                return '\0';
+            case "ArrowRight":
+                consoleKey = ConsoleKey.RightArrow;
+                return '\0';
+            case "ArrowUp":
+                consoleKey = ConsoleKey.UpArrow;
+                return '\0';
+            case "ArrowDown":
+                consoleKey = ConsoleKey.DownArrow;
+                return '\0';
+            case "Delete":
+                consoleKey = ConsoleKey.Delete;
+                return '\0';
+            case "Insert":
+                consoleKey = ConsoleKey.Insert;
+                return '\0';
+            default:
+                return '\0';
+        }
     }
 
-    [JSInvokable]
-    public ValueTask OnCanvasKeyPress(KeyboardEventArgs arg)
+    private ConsoleKey MapKeyboardEventArgsCode(string code)
     {
-        return ValueTask.CompletedTask;
+        switch (code)
+        {
+            case var c when c.StartsWith("Key"):
+                var rest = code.Substring(3, code.Length - 3);
+                Enum.TryParse(rest, out ConsoleKey consoleKey);
+                return consoleKey;
+            case var c when c.StartsWith("Digit"):
+                rest = code.Substring(5, code.Length - 5);
+                Enum.TryParse($"D{rest}", out consoleKey);
+                return consoleKey;
+            case "Minus":
+            case "Equal":
+            case "BracketLeft":
+            case "Quote":
+            case "IntlBackslash":
+            case "Slash":
+            case "Backquote":
+                Enum.TryParse("OemMinus", out consoleKey);
+                return consoleKey;
+            case "Comma":
+                Enum.TryParse("OemComma", out consoleKey);
+                return consoleKey;
+            case "Period":
+                Enum.TryParse("OemPeriod", out consoleKey);
+                return consoleKey;
+            case "ArrowLeft":
+                Enum.TryParse("LeftArrow", out consoleKey);
+                return consoleKey;
+            case "ArrowRight":
+                Enum.TryParse("RightArrow", out consoleKey);
+                return consoleKey;
+            case "ArrowUp":
+                Enum.TryParse("UpArrow", out consoleKey);
+                return consoleKey;
+            case "ArrowDown":
+                Enum.TryParse("DownArrow", out consoleKey);
+                return consoleKey;
+            default:
+                var success = Enum.TryParse(code, out consoleKey);
+                return consoleKey;
+        }
     }
 
     [JSInvokable]

@@ -57,9 +57,6 @@ window.canvasToPng = () => {
 window.initConsole = (instance) => {
     var canvasContainer = document.getElementById('_divCanvas'),
         canvases = canvasContainer.getElementsByTagName('canvas') || [];
-    canvasContainer.oncontextmenu = function () {
-        return false;
-    }
     window.consoleJs = {
         instance: instance,
         canvas: canvases.length ? canvases[0] : null
@@ -71,25 +68,32 @@ window.initConsole = (instance) => {
                 return;
             var me = getMouseEvent(e);
             window.consoleJs.instance.invokeMethodAsync('OnCanvasMouse', me);
+            return false;
         };
         window.consoleJs.canvas.onmousedown = (e) => {
             if (!canvasHasFocus)
                 return;
             var me = getMouseEvent(e);
             window.consoleJs.instance.invokeMethodAsync('OnCanvasMouse', me);
+            return false;
         };
         window.consoleJs.canvas.onmouseup = (e) => {
             if (!canvasHasFocus)
                 return;
             var me = getMouseEvent(e);
             window.consoleJs.instance.invokeMethodAsync('OnCanvasMouse', me);
+            return false;
         };
         window.consoleJs.canvas.onmousewheel = (e) => {
             if (!canvasHasFocus)
                 return;
             var we = getWheelEvent(e);
             window.consoleJs.instance.invokeMethodAsync('OnCanvasWheel', we);
+            return false;
         };
+        window.consoleJs.canvas.oncontextmenu = function () {
+            return false;
+        }
 
         window.consoleJs.canvas.onkeydown = (e) => {
             if (!canvasHasFocus)
