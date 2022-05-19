@@ -276,7 +276,41 @@ public partial class WebConsole : ComponentBase
         };
         this._inputResultQueue.Enqueue(inputResult);
         this.OnReadConsoleInput();
+        if (obj.Type == "mouseup")
+            this.ProcessClickEvent(me);
         return ValueTask.FromCanceled(new CancellationToken(true));
+    }
+
+    private void ProcessClickEvent(WebMouseEvent me)
+    {
+        var mouseEvent = new WebMouseEvent();
+        MouseButtonState buttonState;
+        switch (me.ButtonState)
+        {
+            case MouseButtonState.Button1Released:
+                buttonState = MouseButtonState.Button1Clicked;
+                break;
+            case MouseButtonState.Button2Released:
+                buttonState = MouseButtonState.Button2Clicked;
+                break;
+            case MouseButtonState.Button3Released:
+                buttonState = MouseButtonState.Button3Clicked;
+                break;
+            case MouseButtonState.Button4Released:
+                buttonState = MouseButtonState.Button4Clicked;
+                break;
+            default:
+                return;
+        }
+        mouseEvent.ButtonState = buttonState;
+        mouseEvent.Position = me.Position;
+        var inputResult = new InputResult
+        {
+            EventType = EventType.Mouse,
+            MouseEvent = mouseEvent
+        };
+        this._inputResultQueue.Enqueue(inputResult);
+        this.OnReadConsoleInput();
     }
 
     private bool GetMouseEvent(MouseEventArgs me, out WebMouseEvent mouseEvent)
@@ -313,19 +347,52 @@ public partial class WebConsole : ComponentBase
                 0 => MouseButtonState.Button1Pressed,
                 1 => MouseButtonState.Button2Pressed,
                 2 => MouseButtonState.Button3Pressed,
-                3 => MouseButtonState.Button4Pressed,
+                _ => MouseButtonState.Button4Pressed,
             };
         }
 
         MouseButtonState GetButtonReleased()
         {
-            return me.Button switch
+            if (me.Detail == 1)
             {
-                0 => MouseButtonState.Button1Released,
-                1 => MouseButtonState.Button2Released,
-                2 => MouseButtonState.Button3Released,
-                3 => MouseButtonState.Button4Released,
-            };
+                return me.Button switch
+                {
+                    0 => MouseButtonState.Button1Released,
+                    1 => MouseButtonState.Button2Released,
+                    2 => MouseButtonState.Button3Released,
+                    _ => MouseButtonState.Button4Released,
+                };
+            }
+            else if (me.Detail + 1 == 2)
+            {
+                return me.Button switch
+                {
+                    0 => MouseButtonState.Button1Clicked,
+                    1 => MouseButtonState.Button2Clicked,
+                    2 => MouseButtonState.Button3Clicked,
+                    _ => MouseButtonState.Button4Clicked,
+                };
+            }
+            else if (me.Detail + 1 == 3)
+            {
+                return me.Button switch
+                {
+                    0 => MouseButtonState.Button1DoubleClicked,
+                    1 => MouseButtonState.Button2DoubleClicked,
+                    2 => MouseButtonState.Button3DoubleClicked,
+                    _ => MouseButtonState.Button4DoubleClicked,
+                };
+            }
+            else
+            {
+                return me.Button switch
+                {
+                    0 => MouseButtonState.Button1TripleClicked,
+                    1 => MouseButtonState.Button2TrippleClicked,
+                    2 => MouseButtonState.Button3TripleClicked,
+                    _ => MouseButtonState.Button4TripleClicked,
+                };
+            }
         }
     }
 
