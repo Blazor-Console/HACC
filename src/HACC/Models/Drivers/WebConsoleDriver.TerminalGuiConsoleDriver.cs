@@ -42,12 +42,13 @@ public partial class WebConsoleDriver
     public override WebClipboard Clipboard { get; }
 
     // The format is rows, columns and 3 values on the last column: Rune, Attribute and Dirty Flag
+    private int[,,] contents;
     private bool[] _dirtyLine;
 
     /// <summary>
     ///     Assists with testing, the format is rows, columns and 3 values on the last column: Rune, Attribute and Dirty Flag
     /// </summary>
-    private int[,,] Contents { get; set; }
+    public override int[,,] Contents => this.contents;
 
     internal bool firstRender = true;
 
@@ -66,7 +67,7 @@ public partial class WebConsoleDriver
 
     public override void AddRune(Rune rune)
     {
-        if (this.Contents.Length != this.Rows * this.Cols * 3) return;
+        if (this.contents.Length != this.Rows * this.Cols * 3) return;
         rune = MakePrintable(c: rune);
         var runeWidth = Rune.ColumnWidth(rune: rune);
         var validClip = IsValidContent(col: ccol, row: crow, clip: Clip);
@@ -74,31 +75,31 @@ public partial class WebConsoleDriver
         if (validClip)
         {
             if (runeWidth < 2 && this.ccol > 0
-                && Rune.ColumnWidth((char) this.Contents[this.crow, this.ccol - 1, (int) RuneDataType.Rune]) > 1)
+                && Rune.ColumnWidth((char) this.contents[this.crow, this.ccol - 1, (int) RuneDataType.Rune]) > 1)
             {
 
-                this.Contents[this.crow, this.ccol - 1, (int) RuneDataType.Rune] = (int) (uint) ' ';
+                this.contents[this.crow, this.ccol - 1, (int) RuneDataType.Rune] = (int) (uint) ' ';
 
             }
             else if (runeWidth < 2 && this.ccol <= this.Clip.Right - 1
-              && Rune.ColumnWidth((char) this.Contents[this.crow, this.ccol, (int) RuneDataType.Rune]) > 1)
+              && Rune.ColumnWidth((char) this.contents[this.crow, this.ccol, (int) RuneDataType.Rune]) > 1)
             {
 
-                this.Contents[this.crow, this.ccol + 1, (int) RuneDataType.Rune] = (int) (uint) ' ';
-                this.Contents[this.crow, this.ccol + 1, (int) RuneDataType.DirtyFlag] = 1;
+                this.contents[this.crow, this.ccol + 1, (int) RuneDataType.Rune] = (int) (uint) ' ';
+                this.contents[this.crow, this.ccol + 1, (int) RuneDataType.DirtyFlag] = 1;
             }
             if (runeWidth > 1 && this.ccol == this.Clip.Right - 1)
-                this.Contents[this.crow,
+                this.contents[this.crow,
                 this.ccol,
                 (int) RuneDataType.Rune] = (int) (uint) ' ';
             else
-                this.Contents[this.crow,
+                this.contents[this.crow,
                 this.ccol,
                 (int) RuneDataType.Rune] = (int) (uint) rune;
-            this.Contents[this.crow,
+            this.contents[this.crow,
                 this.ccol,
                 (int) RuneDataType.Attribute] = this._currentAttribute;
-            this.Contents[this.crow,
+            this.contents[this.crow,
                 this.ccol,
                 (int) RuneDataType.DirtyFlag] = 1;
             this._dirtyLine[this.crow] = true;
@@ -109,10 +110,10 @@ public partial class WebConsoleDriver
         {
             if (validClip && this.ccol < this.Clip.Right)
             {
-                this.Contents[this.crow,
+                this.contents[this.crow,
                     this.ccol,
                     (int) RuneDataType.Attribute] = this._currentAttribute;
-                this.Contents[this.crow,
+                this.contents[this.crow,
                     this.ccol,
                     (int) RuneDataType.DirtyFlag] = 0;
             }
@@ -253,7 +254,7 @@ public partial class WebConsoleDriver
     {
         if (this.firstRender) return;
 
-        lock (this.Contents)
+        lock (this.contents)
         {
             var dirtySegments = new List<DirtySegment>();
             var output = new System.Text.StringBuilder();
@@ -272,7 +273,7 @@ public partial class WebConsoleDriver
                 for (var col = left; col < cols; col++)
                 {
                     // no dirty flag here continue
-                    if (col > 0 && this.Contents[row,
+                    if (col > 0 && this.contents[row,
                             col,
                             (int) RuneDataType.DirtyFlag] == 0)
                     {
@@ -301,7 +302,7 @@ public partial class WebConsoleDriver
                         segmentStart = col;
 
                     // get color at current position
-                    var color = this.Contents[
+                    var color = this.contents[
                         row,
                         col,
                         (int) RuneDataType.Attribute];
@@ -323,10 +324,10 @@ public partial class WebConsoleDriver
                     }
                     outputWidth++;
                     // append to buffer
-                    output.Append(value: (char) this.Contents[row, col, (int) RuneDataType.Rune]);
+                    output.Append(value: (char) this.contents[row, col, (int) RuneDataType.Rune]);
 
                     // clear the flag
-                    this.Contents[row,
+                    this.contents[row,
                         col,
                         (int) RuneDataType.DirtyFlag] = 0;
                 } // col
@@ -765,7 +766,7 @@ public partial class WebConsoleDriver
 
     public override void UpdateOffScreen()
     {
-        this.Contents = new int[this.Rows, this.Cols, 3];
+        this.contents = new int[this.Rows, this.Cols, 3];
         this._dirtyLine = new bool[this.Rows];
 
         // Can raise an exception while is still resizing.
@@ -774,13 +775,13 @@ public partial class WebConsoleDriver
             for (var row = 0; row < this.Rows; row++)
                 for (var c = 0; c < this.Cols; c++)
                 {
-                    this.Contents[row,
+                    this.contents[row,
                         c,
                         (int) RuneDataType.Rune] = ' ';
-                    this.Contents[row,
+                    this.contents[row,
                         c,
                         (int) RuneDataType.Attribute] = Colors.TopLevel.Normal;
-                    this.Contents[row,
+                    this.contents[row,
                         c,
                         (int) RuneDataType.DirtyFlag] = 0;
                     this._dirtyLine[row] = true;

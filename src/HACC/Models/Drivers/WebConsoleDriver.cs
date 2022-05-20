@@ -30,7 +30,7 @@ public sealed partial class WebConsoleDriver : ConsoleDriver, IAnsiConsole
         this.ExclusivityMode = new BrowserExclusivityMode();
         this._webConsole = webConsole;
         this.TerminalSettings = new TerminalSettings();
-        this.Contents = new int[this.BufferRows, this.BufferColumns, 3];
+        this.contents = new int[this.BufferRows, this.BufferColumns, 3];
         this._dirtyLine = new bool[this.BufferRows];
     }
 

@@ -13,7 +13,8 @@ public class WebApplication
     public readonly WebConsoleDriver WebConsoleDriver;
     public readonly WebMainLoopDriver WebMainLoopDriver;
     private bool _initialized;
-    private Application.RunState? state;
+    private Application.RunState? _state;
+    private List<Application.RunState> _runStates = new List<Application.RunState>();
 
     public WebApplication(WebConsoleDriver webConsoleDriver,
         WebMainLoopDriver webMainLoopDriver, WebConsole webConsole)
@@ -28,10 +29,10 @@ public class WebApplication
 
     private void WebConsole_RunIterationNeeded()
     {
-        if (this.state == null) return;
+        if (this._state == null) return;
 
         var firstIteration = false;
-        Application.RunIteration(state: ref this.state,
+        Application.RunIteration(state: ref this._state,
             wait: this.wait,
             firstIteration: ref firstIteration);
     }
@@ -40,10 +41,35 @@ public class WebApplication
     {
         if (this._initialized) return;
 
+        Application.ExitRunLoopAfterFirstIteration = true;
         Application.Init(
             driver: this.WebConsoleDriver,
             mainLoopDriver: this.WebMainLoopDriver);
+        Application.NotifyNewRunState += this.Application_NotifyNewRunState;
+        Application.NotifyStopRunState += this.Application_NotifyStopRunState;
         this._initialized = true;
+    }
+
+    private void Application_NotifyStopRunState(Toplevel obj)
+    {
+        var runState = _runStates.Find(rs => rs.Toplevel == obj);
+        if (runState?.Toplevel == obj && Application.Current == obj)
+        {
+            Application.End(runState);
+        }
+        else if (runState?.Toplevel == obj)
+        {
+            var fi = false;
+            Application.RunIteration(ref runState, true, ref fi);
+            Application.End(runState);
+        }
+        if (runState != null)
+            this._runStates.Remove(runState);
+    }
+
+    private void Application_NotifyNewRunState(Application.RunState obj)
+    {
+        this._runStates.Add(obj);
     }
 
     public virtual void Run(Func<Exception, bool>? errorHandler = null)
@@ -77,10 +103,10 @@ public class WebApplication
         {
             if (!this._initialized) this.Init();
 
-            this.state = Application.Begin(toplevel: view ?? Application.Top);
+            this._state = Application.Begin(toplevel: view ?? Application.Top);
             this.WebConsoleDriver.firstRender = false;
             var firstIteration = true;
-            Application.RunIteration(state: ref this.state,
+            Application.RunIteration(state: ref this._state,
                 wait: this.wait,
                 firstIteration: ref firstIteration);
         }
@@ -94,8 +120,8 @@ public class WebApplication
     {
         if (!this._initialized) return;
 
-        if (runState != null || this.state != null)
-            Application.End(runState: runState ?? this.state);
+        if (runState != null || this._state != null)
+            Application.End(runState: runState ?? this._state);
     }
 
     public virtual void Shutdown()

@@ -1,6 +1,5 @@
 using Blazor.Extensions;
 using Blazor.Extensions.Canvas.Canvas2D;
-using Blazor.Extensions.Canvas.Model;
 using HACC.Applications;
 using HACC.Extensions;
 using HACC.Models;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using System.Drawing;
 using System.Globalization;
 using Terminal.Gui;
 
@@ -159,57 +157,40 @@ public partial class WebConsole : ComponentBase
         var lastRow = segments[index: 0].Row;
         var textWidthEm = segments[index: 0].Column;
 
-        try
+        foreach (var segment in segments)
         {
-            foreach (var segment in segments)
+            if (segment.Row != lastRow)
             {
-                if (segment.Row != lastRow)
-                {
-                    lastRow = segment.Row;
-                    textWidthEm = segment.Column;
-                }
-                textWidthEm = Math.Max(textWidthEm, segment.Column * terminalSettings.FontSpacePixels);
-
-                var letterWidthPx = terminalSettings.FontSizePixels;
-                await this._canvas2DContext!.SetFontAsync(
-                    value: $"{letterWidthPx}px " +
-                           $"{terminalSettings.FontType}");
-                await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
-                var measuredText = await this.MeasureText(text: segment.Text,
-                    fontSpacePixels: terminalSettings.FontSpacePixels);
-                await this._canvas2DContext!.SetFillStyleAsync(
-                    value: $"{segment.BackgroundColor}");
-                await this._canvas2DContext.FillRectAsync(
-                    x: textWidthEm,
-                    y: segment.Row * letterWidthPx,
-                    width: (double) measuredText,
-                    height: letterWidthPx);
-                await this._canvas2DContext!.SetStrokeStyleAsync(
-                    value: $"{segment.ForegroundColor}");
-                await this._canvas2DContext.StrokeTextAsync(text: segment.Text,
-                    x: textWidthEm,
-                    y: segment.Row * letterWidthPx,
-                    maxWidth: (double) measuredText);
-
-                textWidthEm += (int) measuredText;
+                lastRow = segment.Row;
+                textWidthEm = segment.Column;
             }
-            if (_firstRender)
-            {
+            textWidthEm = Math.Max(textWidthEm, segment.Column * terminalSettings.FontSpacePixels);
 
+            var letterWidthPx = terminalSettings.FontSizePixels;
+            await this._canvas2DContext!.SetFontAsync(
+                value: $"{letterWidthPx}px " +
+                       $"{terminalSettings.FontType}");
+            await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
+            var measuredText = await this.MeasureText(text: segment.Text,
+                fontSpacePixels: terminalSettings.FontSpacePixels);
+            await this._canvas2DContext!.SetFillStyleAsync(
+                value: $"{segment.BackgroundColor}");
+            await this._canvas2DContext.FillRectAsync(
+                x: textWidthEm,
+                y: segment.Row * letterWidthPx,
+                width: (double) measuredText,
+                height: letterWidthPx);
+            await this._canvas2DContext!.SetStrokeStyleAsync(
+                value: $"{segment.ForegroundColor}");
+            await this._canvas2DContext.StrokeTextAsync(text: segment.Text,
+                x: textWidthEm,
+                y: segment.Row * letterWidthPx,
+                maxWidth: (double) measuredText);
 
-                //this.StateHasChanged();
-                //await this._canvas2DContext!.FillRectAsync(0, 0, 640, 480);
-                //_ = this._canvas2DContext!.ClearRectAsync(0, 0, 640, 480);
-                //_ = this._canvas2DContext.BeginPathAsync();
-                //this.OnReadConsoleInput();
-                _firstRender = false;
-            }
+            textWidthEm += (int) measuredText;
         }
-        catch (Exception ex)
-        {
-
-            throw;
-        }
+        if (_firstRender)
+            _firstRender = false;
         Logger.LogDebug(message: "DrawBufferToFrame: end");
     }
 
@@ -262,6 +243,8 @@ public partial class WebConsole : ComponentBase
             this.RunIterationNeeded?.Invoke();
         }
     }
+
+    MouseButtonState? lastButtonPressed;
 
     [JSInvokable]
     public ValueTask OnCanvasMouse(MouseEventArgs obj)
@@ -320,13 +303,16 @@ public partial class WebConsole : ComponentBase
         switch (me.Type)
         {
             case "mousedown":
-                buttonState = GetButtonPressed();
+                lastButtonPressed = buttonState = GetButtonPressed();
                 break;
             case "mouseup":
                 buttonState = GetButtonReleased();
+                lastButtonPressed = null;
                 break;
             case "mousemove":
                 buttonState = MouseButtonState.ReportMousePosition;
+                if (lastButtonPressed != null)
+                    buttonState |= (MouseButtonState) lastButtonPressed;
                 break;
             default:
                 return false;
@@ -459,7 +445,6 @@ public partial class WebConsole : ComponentBase
     [JSInvokable]
     public ValueTask OnCanvasKey(KeyboardEventArgs obj)
     {
-        Console.WriteLine($"{obj.Code};{obj.Key}");
         var consoleKey = MapKeyboardEventArgsCode(obj.Code);
         var keyChar = MapKeyboardEventArgsKey(obj.Key, ref consoleKey);
         var inputResult = new InputResult
