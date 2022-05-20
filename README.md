@@ -14,7 +14,7 @@ C# DotNet 6 HTML ANSI Console Canvas.
 ## Beta!
 ![Right Click works!](https://user-images.githubusercontent.com/3766240/169219917-215267bc-87c1-4323-a3ca-321c6875240a.png)
 
-<iframe class="imgur-embed" width="100%" height="786" frameborder="0" src="https://i.imgur.com/yxvDR1E.gifv#embed"></iframe>
+![Imgur](https://i.imgur.com/yxvDR1E.gifv)
 
 
 ## Tests
