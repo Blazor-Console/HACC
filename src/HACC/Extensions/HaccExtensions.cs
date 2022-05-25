@@ -27,10 +27,31 @@ public static class HaccExtensions
         return LoggerFactory.CreateLogger<T>();
     }
 
-    public static WebAssemblyHostBuilder UseHacc(this WebAssemblyHostBuilder builder)
+    //public static WebAssemblyHostBuilder UseHacc(this WebAssemblyHostBuilder builder)
+    //{
+    //    builder.Logging.ClearProviders();
+    //    builder.Logging.AddCustomLogging(configure: configuration =>
+    //    {
+    //        configuration.LogLevels.Add(
+    //            key: LogLevel.Warning,
+    //            value: ConsoleColor.DarkMagenta);
+    //        configuration.LogLevels.Add(
+    //            key: LogLevel.Error,
+    //            value: ConsoleColor.Red);
+    //    });
+    //    builder.Logging.SetMinimumLevel(level: LogLevel.Debug);
+
+    //    _serviceProvider = builder.Services.BuildServiceProvider();
+    //    _loggerFactory = _serviceProvider.GetService<ILoggerFactory>()!;
+    //    _webClipboard = new WebClipboard();
+
+    //    return builder;
+    //}
+
+    public static ILoggingBuilder UseHaccService(this ILoggingBuilder loggingBuilder, IServiceCollection serviceProvider)
     {
-        builder.Logging.ClearProviders();
-        builder.Logging.AddCustomLogging(configure: configuration =>
+        loggingBuilder.ClearProviders();
+        loggingBuilder.AddCustomLogging(configure: configuration =>
         {
             configuration.LogLevels.Add(
                 key: LogLevel.Warning,
@@ -39,13 +60,13 @@ public static class HaccExtensions
                 key: LogLevel.Error,
                 value: ConsoleColor.Red);
         });
-        builder.Logging.SetMinimumLevel(level: LogLevel.Debug);
+        loggingBuilder.SetMinimumLevel(level: LogLevel.Debug);
 
-        _serviceProvider = builder.Services.BuildServiceProvider();
-        _loggerFactory = _serviceProvider.GetService<ILoggerFactory>()!;
+        _serviceProvider = serviceProvider.BuildServiceProvider();
+        _loggerFactory = _serviceProvider!.GetService<ILoggerFactory>();
         _webClipboard = new WebClipboard();
 
-        return builder;
+        return loggingBuilder;
     }
 
     public static T GetService<T>()
