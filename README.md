@@ -17,7 +17,7 @@ C# DotNet 6 HTML ANSI Console Canvas.
 ![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/3766240/169589558-01748bbf-154b-42f8-bbf6-2f306e28a889.gif)
 
 ### Features
-- Builting PNG framegrab
+- Builtin PNG frame-grabber
   - Can be triggered manually in console mode with window.canvasToPNG() which returns a data string with the frame at the time.
   - Can be integrated into an app with JSInterop calls such that the console application can have a "save to png" option, etc
   - ![image](https://user-images.githubusercontent.com/3766240/170335937-37b4b461-665c-497f-8538-1a4d8255289a.png)
