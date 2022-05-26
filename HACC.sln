@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Demo", "src\HACC.Demo\HACC.Demo.csproj", "{C071EFA3-2EDE-4EC4-A6A0-F205F4694C67}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Renci.SshNet", "src\SSH.NET\src\Renci.SshNet\Renci.SshNet.csproj", "{3AFEC1AE-8109-40DB-8886-47C9D00A7028}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{C071EFA3-2EDE-4EC4-A6A0-F205F4694C67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C071EFA3-2EDE-4EC4-A6A0-F205F4694C67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C071EFA3-2EDE-4EC4-A6A0-F205F4694C67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AFEC1AE-8109-40DB-8886-47C9D00A7028}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AFEC1AE-8109-40DB-8886-47C9D00A7028}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AFEC1AE-8109-40DB-8886-47C9D00A7028}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AFEC1AE-8109-40DB-8886-47C9D00A7028}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,3 +10,6 @@
 	path = src/Blazor.Extensions.Canvas
 	url = https://github.com/Blazor-Console/Blazor.Extensions.Canvas.git
     branch = main
+[submodule "src/SSH.NET"]
+	path = src/SSH.NET
+	url = https://github.com/FreddieMercurial-forks/SSH.NET.git
