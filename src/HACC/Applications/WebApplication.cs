@@ -5,16 +5,17 @@ using Terminal.Gui;
 
 namespace HACC.Applications;
 
-public class WebApplication
+public class WebApplication : IDisposable
 {
-    private readonly bool wait = true;
-    public readonly WebConsole WebConsole;
-
-    public readonly WebConsoleDriver WebConsoleDriver;
-    public readonly WebMainLoopDriver WebMainLoopDriver;
+    private readonly bool _wait = true;
     private bool _initialized;
     private Application.RunState? _state;
     private List<Application.RunState> _runStates = new List<Application.RunState>();
+    private Timer? _timer;
+
+    public readonly WebConsole WebConsole;
+    public readonly WebConsoleDriver WebConsoleDriver;
+    public readonly WebMainLoopDriver WebMainLoopDriver;
 
     public WebApplication(WebConsoleDriver webConsoleDriver,
         WebMainLoopDriver webMainLoopDriver, WebConsole webConsole)
@@ -33,8 +34,14 @@ public class WebApplication
 
         var firstIteration = false;
         Application.RunIteration(state: ref this._state,
-            wait: this.wait,
+            wait: this._wait,
             firstIteration: ref firstIteration);
+        if (_timer != null && Application.MainLoop.Timeouts.Count == 0)
+        {
+            _timer!.Change(Timeout.Infinite, Timeout.Infinite);
+            _timer.Dispose();
+            _timer = null;
+        }
     }
 
     public virtual void Init()
@@ -47,7 +54,16 @@ public class WebApplication
             mainLoopDriver: this.WebMainLoopDriver);
         Application.NotifyNewRunState += this.Application_NotifyNewRunState;
         Application.NotifyStopRunState += this.Application_NotifyStopRunState;
+        Application.MainLoop.TimeoutAdded += this.MainLoop_TimeoutAdded;
         this._initialized = true;
+    }
+
+    private void MainLoop_TimeoutAdded(long obj)
+    {
+        var now = DateTime.UtcNow.Ticks;
+        var waitTimeout = Math.Max((int) ((obj - now) / TimeSpan.TicksPerMillisecond), 0);
+        _timer = new Timer(_ => this.WebConsole.OnTimeout(),
+            null, waitTimeout, Timeout.Infinite);
     }
 
     private void Application_NotifyStopRunState(Toplevel obj)
@@ -107,7 +123,7 @@ public class WebApplication
             this.WebConsoleDriver.firstRender = false;
             var firstIteration = true;
             Application.RunIteration(state: ref this._state,
-                wait: this.wait,
+                wait: this._wait,
                 firstIteration: ref firstIteration);
         }
         catch (Exception error) when (errorHandler != null)
@@ -128,5 +144,10 @@ public class WebApplication
     {
         Application.Shutdown();
         this._initialized = false;
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
     }
 }

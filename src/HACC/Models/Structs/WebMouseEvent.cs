@@ -6,5 +6,5 @@ namespace HACC.Models.Structs;
 public struct WebMouseEvent
 {
     public Point Position;
-    public MouseButtonState ButtonState;
+    public WebMouseButtonState ButtonState;
 }

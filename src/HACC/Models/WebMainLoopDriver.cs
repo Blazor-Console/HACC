@@ -21,14 +21,14 @@ namespace HACC.Models;
 /// </remarks>
 public class WebMainLoopDriver : IMainLoopDriver
 {
-    private readonly Queue<InputResult> _inputResult = new();
+    private readonly Queue<WebInputResult> _inputResult = new();
     private readonly WebConsole _webConsole;
     private MainLoop? _mainLoop;
 
     /// <summary>
     ///     Invoked when a Key is pressed, mouse is clicked or on resizing.
     /// </summary>
-    public Action<InputResult>? ProcessInput;
+    public Action<WebInputResult>? ProcessInput;
 
 
     /// <summary>
@@ -49,7 +49,7 @@ public class WebMainLoopDriver : IMainLoopDriver
 
     void IMainLoopDriver.Wakeup()
     {
-        this._mainLoop!.EventsPending();
+        this._webConsole.OnWakeup();
     }
 
     bool IMainLoopDriver.EventsPending(bool wait)
@@ -63,7 +63,7 @@ public class WebMainLoopDriver : IMainLoopDriver
         while (this._inputResult.Count > 0) this.ProcessInput?.Invoke(obj: this._inputResult.Dequeue());
     }
 
-    private void WebConsole_ReadConsoleInput(InputResult obj)
+    private void WebConsole_ReadConsoleInput(WebInputResult obj)
     {
         this._inputResult.Enqueue(item: obj);
     }

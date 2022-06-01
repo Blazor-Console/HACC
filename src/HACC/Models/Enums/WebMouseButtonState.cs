@@ -1,7 +1,7 @@
-﻿namespace HACC.Models.Enums;
+namespace HACC.Models.Enums;
 
 [Flags]
-public enum MouseButtonState
+public enum WebMouseButtonState
 {
     Button1Pressed = 0x1,
     Button1Released = 0x2,

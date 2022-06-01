@@ -31,7 +31,7 @@ public partial class WebConsole : ComponentBase
     /// </summary>
     private ElementReference? _divCanvas;
 
-    private Queue<InputResult> _inputResultQueue = new();
+    private Queue<WebInputResult> _inputResultQueue = new();
     private int _screenHeight = 480;
     private int _screenWidth = 640;
     private bool _firstRender;
@@ -50,7 +50,7 @@ public partial class WebConsole : ComponentBase
 
     public bool CanvasInitialized => _canvas2DContext != null;
 
-    public event Action<InputResult>? ReadConsoleInput;
+    public event Action<WebInputResult>? ReadConsoleInput;
     public event Action? RunIterationNeeded;
 
     protected override Task OnInitializedAsync()
@@ -232,19 +232,45 @@ public partial class WebConsole : ComponentBase
         // ReSharper restore HeapView.ObjectAllocation
     }
 
-    private void OnReadConsoleInput()
+    bool _isReadConsoleInput;
+
+    public virtual void OnReadConsoleInput()
     {
         if (this.ReadConsoleInput == null)
             return;
 
+        _isReadConsoleInput = true;
         while (_inputResultQueue.Count > 0)
         {
             this.ReadConsoleInput?.Invoke(obj: _inputResultQueue.Dequeue());
-            this.RunIterationNeeded?.Invoke();
+            OnRunIterationNeeded();
         }
+        _isReadConsoleInput = false;
     }
 
-    MouseButtonState? lastButtonPressed;
+    bool _isRunIterationNeeded;
+
+    public virtual void OnRunIterationNeeded()
+    {
+        this._isRunIterationNeeded = true;
+        this.RunIterationNeeded?.Invoke();
+        this._isRunIterationNeeded = false;
+    }
+
+    public virtual void OnTimeout()
+    {
+        if (!_isReadConsoleInput && !_isRunIterationNeeded)
+            this.OnRunIterationNeeded();
+    }
+
+    public virtual void OnWakeup()
+    {
+        if (!_isReadConsoleInput && !_isRunIterationNeeded)
+            this.OnRunIterationNeeded();
+    }
+
+    WebMouseButtonState? _lastButtonPressed;
+    WebMouseEvent _lastMouseEvent;
 
     [JSInvokable]
     public ValueTask OnCanvasMouse(MouseEventArgs obj)
@@ -252,44 +278,78 @@ public partial class WebConsole : ComponentBase
         if (!this.GetMouseEvent(obj, out WebMouseEvent me))
             return ValueTask.CompletedTask;
         // of relevance: ActiveConsole
-        var inputResult = new InputResult
+        var inputResult = new WebInputResult
         {
-            EventType = EventType.Mouse,
+            EventType = WebEventType.Mouse,
             MouseEvent = me
         };
+        _lastMouseEvent = me;
         this._inputResultQueue.Enqueue(inputResult);
         this.OnReadConsoleInput();
-        if (obj.Type == "mouseup")
+        if (obj.Type == "mousedown")
+        {
+            Task.Run(async () => await ProcessContinuousButtonPressedAsync());
+        }
+        else if (obj.Type == "mouseup")
+        {
             this.ProcessClickEvent(me);
+        }
         return ValueTask.FromCanceled(new CancellationToken(true));
+    }
+
+    private async Task ProcessContinuousButtonPressedAsync()
+    {
+        while (_lastButtonPressed != null)
+        {
+            await Task.Delay(100);
+            var view = Application.WantContinuousButtonPressedView;
+            if (view == null)
+            {
+                break;
+            }
+            if (_lastButtonPressed != null)
+            {
+                var inputResult = new WebInputResult
+                {
+                    EventType = WebEventType.Mouse,
+                    MouseEvent = _lastMouseEvent
+                };
+                this._inputResultQueue.Enqueue(inputResult);
+                this.OnReadConsoleInput();
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     private void ProcessClickEvent(WebMouseEvent me)
     {
         var mouseEvent = new WebMouseEvent();
-        MouseButtonState buttonState;
+        WebMouseButtonState buttonState;
         switch (me.ButtonState)
         {
-            case MouseButtonState.Button1Released:
-                buttonState = MouseButtonState.Button1Clicked;
+            case WebMouseButtonState.Button1Released:
+                buttonState = WebMouseButtonState.Button1Clicked;
                 break;
-            case MouseButtonState.Button2Released:
-                buttonState = MouseButtonState.Button2Clicked;
+            case WebMouseButtonState.Button2Released:
+                buttonState = WebMouseButtonState.Button2Clicked;
                 break;
-            case MouseButtonState.Button3Released:
-                buttonState = MouseButtonState.Button3Clicked;
+            case WebMouseButtonState.Button3Released:
+                buttonState = WebMouseButtonState.Button3Clicked;
                 break;
-            case MouseButtonState.Button4Released:
-                buttonState = MouseButtonState.Button4Clicked;
+            case WebMouseButtonState.Button4Released:
+                buttonState = WebMouseButtonState.Button4Clicked;
                 break;
             default:
                 return;
         }
         mouseEvent.ButtonState = buttonState;
         mouseEvent.Position = me.Position;
-        var inputResult = new InputResult
+        var inputResult = new WebInputResult
         {
-            EventType = EventType.Mouse,
+            EventType = WebEventType.Mouse,
             MouseEvent = mouseEvent
         };
         this._inputResultQueue.Enqueue(inputResult);
@@ -299,20 +359,20 @@ public partial class WebConsole : ComponentBase
     private bool GetMouseEvent(MouseEventArgs me, out WebMouseEvent mouseEvent)
     {
         mouseEvent = new WebMouseEvent();
-        MouseButtonState buttonState;
+        WebMouseButtonState buttonState;
         switch (me.Type)
         {
             case "mousedown":
-                lastButtonPressed = buttonState = GetButtonPressed();
+                _lastButtonPressed = buttonState = GetButtonPressed();
                 break;
             case "mouseup":
                 buttonState = GetButtonReleased();
-                lastButtonPressed = null;
+                _lastButtonPressed = null;
                 break;
             case "mousemove":
-                buttonState = MouseButtonState.ReportMousePosition;
-                if (lastButtonPressed != null)
-                    buttonState |= (MouseButtonState) lastButtonPressed;
+                buttonState = WebMouseButtonState.ReportMousePosition;
+                if (_lastButtonPressed != null)
+                    buttonState |= (WebMouseButtonState) _lastButtonPressed;
                 break;
             default:
                 return false;
@@ -326,57 +386,57 @@ public partial class WebConsole : ComponentBase
         mouseEvent.Position.Y = (int) me.OffsetY / terminalSettings.FontSizePixels;
         return true;
 
-        MouseButtonState GetButtonPressed()
+        WebMouseButtonState GetButtonPressed()
         {
             return me.Button switch
             {
-                0 => MouseButtonState.Button1Pressed,
-                1 => MouseButtonState.Button2Pressed,
-                2 => MouseButtonState.Button3Pressed,
-                _ => MouseButtonState.Button4Pressed,
+                0 => WebMouseButtonState.Button1Pressed,
+                1 => WebMouseButtonState.Button2Pressed,
+                2 => WebMouseButtonState.Button3Pressed,
+                _ => WebMouseButtonState.Button4Pressed,
             };
         }
 
-        MouseButtonState GetButtonReleased()
+        WebMouseButtonState GetButtonReleased()
         {
             if (me.Detail == 1)
             {
                 return me.Button switch
                 {
-                    0 => MouseButtonState.Button1Released,
-                    1 => MouseButtonState.Button2Released,
-                    2 => MouseButtonState.Button3Released,
-                    _ => MouseButtonState.Button4Released,
+                    0 => WebMouseButtonState.Button1Released,
+                    1 => WebMouseButtonState.Button2Released,
+                    2 => WebMouseButtonState.Button3Released,
+                    _ => WebMouseButtonState.Button4Released,
                 };
             }
             else if (me.Detail + 1 == 2)
             {
                 return me.Button switch
                 {
-                    0 => MouseButtonState.Button1Clicked,
-                    1 => MouseButtonState.Button2Clicked,
-                    2 => MouseButtonState.Button3Clicked,
-                    _ => MouseButtonState.Button4Clicked,
+                    0 => WebMouseButtonState.Button1Clicked,
+                    1 => WebMouseButtonState.Button2Clicked,
+                    2 => WebMouseButtonState.Button3Clicked,
+                    _ => WebMouseButtonState.Button4Clicked,
                 };
             }
             else if (me.Detail + 1 == 3)
             {
                 return me.Button switch
                 {
-                    0 => MouseButtonState.Button1DoubleClicked,
-                    1 => MouseButtonState.Button2DoubleClicked,
-                    2 => MouseButtonState.Button3DoubleClicked,
-                    _ => MouseButtonState.Button4DoubleClicked,
+                    0 => WebMouseButtonState.Button1DoubleClicked,
+                    1 => WebMouseButtonState.Button2DoubleClicked,
+                    2 => WebMouseButtonState.Button3DoubleClicked,
+                    _ => WebMouseButtonState.Button4DoubleClicked,
                 };
             }
             else
             {
                 return me.Button switch
                 {
-                    0 => MouseButtonState.Button1TripleClicked,
-                    1 => MouseButtonState.Button2TrippleClicked,
-                    2 => MouseButtonState.Button3TripleClicked,
-                    _ => MouseButtonState.Button4TripleClicked,
+                    0 => WebMouseButtonState.Button1TripleClicked,
+                    1 => WebMouseButtonState.Button2TrippleClicked,
+                    2 => WebMouseButtonState.Button3TripleClicked,
+                    _ => WebMouseButtonState.Button4TripleClicked,
                 };
             }
         }
@@ -387,9 +447,9 @@ public partial class WebConsole : ComponentBase
     {
         if (!this.GetWheelEvent(obj, out WebMouseEvent me))
             return ValueTask.CompletedTask;
-        var inputResult = new InputResult
+        var inputResult = new WebInputResult
         {
-            EventType = EventType.Mouse,
+            EventType = WebEventType.Mouse,
             MouseEvent = me
         };
         this._inputResultQueue.Enqueue(inputResult);
@@ -400,7 +460,7 @@ public partial class WebConsole : ComponentBase
     private bool GetWheelEvent(WheelEventArgs we, out WebMouseEvent mouseEvent)
     {
         mouseEvent = new WebMouseEvent();
-        MouseButtonState buttonState;
+        WebMouseButtonState buttonState;
         switch (we.Type)
         {
             case "mousewheel":
@@ -423,21 +483,21 @@ public partial class WebConsole : ComponentBase
         mouseEvent.Position.Y = (int) we.OffsetY / terminalSettings.FontSizePixels;
         return true; ;
 
-        MouseButtonState GetWheelDeltaX()
+        WebMouseButtonState GetWheelDeltaX()
         {
             return we.DeltaX switch
             {
-                > 0 => MouseButtonState.ButtonWheeledRight,
-                _ => MouseButtonState.ButtonWheeledLeft,
+                > 0 => WebMouseButtonState.ButtonWheeledRight,
+                _ => WebMouseButtonState.ButtonWheeledLeft,
             };
         }
 
-        MouseButtonState GetWheelDeltaY()
+        WebMouseButtonState GetWheelDeltaY()
         {
             return we.DeltaY switch
             {
-                > 0 => MouseButtonState.ButtonWheeledDown,
-                _ => MouseButtonState.ButtonWheeledUp,
+                > 0 => WebMouseButtonState.ButtonWheeledDown,
+                _ => WebMouseButtonState.ButtonWheeledUp,
             };
         }
     }
@@ -447,9 +507,9 @@ public partial class WebConsole : ComponentBase
     {
         var consoleKey = MapKeyboardEventArgsCode(obj.Code);
         var keyChar = MapKeyboardEventArgsKey(obj.Key, ref consoleKey);
-        var inputResult = new InputResult
+        var inputResult = new WebInputResult
         {
-            EventType = EventType.Key,
+            EventType = WebEventType.Key,
             KeyEvent = new WebKeyEvent
             {
                 KeyDown = GetKeyType(obj.Type),
@@ -568,10 +628,10 @@ public partial class WebConsole : ComponentBase
         this._screenHeight = sh / terminalSettings.FontSizePixels * terminalSettings.FontSizePixels;
         this._becanvas!.SetCanvasSizeAsync(this._screenWidth, this._screenHeight);
         this.InvokeAsync(StateHasChanged);
-        var inputResult = new InputResult
+        var inputResult = new WebInputResult
         {
-            EventType = EventType.Resize,
-            ResizeEvent = new ResizeEvent
+            EventType = WebEventType.Resize,
+            ResizeEvent = new WebResizeEvent
             {
                 Size = new System.Drawing.Size(width: this._screenWidth,
                     height: this._screenHeight),
@@ -585,7 +645,8 @@ public partial class WebConsole : ComponentBase
     [JSInvokable]
     public ValueTask OnFocus()
     {
-        if (this._canvas2DContext == null) return ValueTask.CompletedTask;
+        if (this._canvas2DContext == null) return default;
+        HaccExtensions.WebClipboard.GetClipboardData();
         return ValueTask.CompletedTask;
     }
 

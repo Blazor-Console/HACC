@@ -17,36 +17,58 @@ public class WebClipboard : ClipboardBase
         this._jsRuntime = HaccExtensions.GetService<IJSRuntime>();
     }
 
-    [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public string? Text { get; set; } = string.Empty;
 
     public override bool IsSupported => true;
 
     protected override string GetClipboardDataImpl()
     {
-        // ReSharper disable once HeapView.DelegateAllocation
-        var task = Task.Run(function: async () =>
+        Task.Run(async () => await this.ReadFromClipboardAsync());
+        return this.Text!;
+    }
+
+    private async Task ReadFromClipboardAsync()
+    {
+        // Reading from the clipboard may be denied, so you must handle the exception
+        try
         {
-            var clipboardData = await this._jsRuntime.InvokeAsync<string>(identifier: "clipboardFunctions.getText");
-            if (clipboardData is { } text) return text;
-            return null;
-        });
-        task.Wait();
-        var text = task.Result ?? string.Empty;
-        this.Text = text;
-        return text;
+            this.Text = await ReadTextAsync();
+        }
+        catch
+        {
+            Console.WriteLine("Cannot read from clipboard");
+            this.Text = null;
+        }
+    }
+
+    private ValueTask<string> ReadTextAsync()
+    {
+        return _jsRuntime.InvokeAsync<string>("navigator.clipboard.readText");
     }
 
     protected override void SetClipboardDataImpl(string text)
     {
-        // ReSharper disable once HeapView.DelegateAllocation
-        // ReSharper disable once HeapView.ObjectAllocation
-        var task = Task.Run(
-            function: async () => await this._jsRuntime
-                .InvokeAsync<bool>(
-                    identifier: "clipboardFunctions.setText",
-                    args: text)
-                .ConfigureAwait(continueOnCapturedContext: false));
-        task.Wait();
+        Task.Run(async () => await this.CopyToClipboardAsync(text));
         this.Text = text;
+    }
+
+    private async Task CopyToClipboardAsync(string text)
+    {
+        // Writing to the clipboard may be denied, so you must handle the exception
+        try
+        {
+            await WriteTextAsync(text);
+            this.Text = text;
+        }
+        catch
+        {
+            Console.WriteLine("Cannot write text to clipboard");
+            this.Text = null;
+        }
+    }
+
+    private ValueTask WriteTextAsync(string text)
+    {
+        return _jsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
     }
 }

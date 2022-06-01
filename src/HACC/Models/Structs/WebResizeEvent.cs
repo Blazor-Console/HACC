@@ -1,8 +1,8 @@
-﻿using System.Drawing;
+using System.Drawing;
 
 namespace HACC.Models.Structs;
 
-public struct ResizeEvent
+public struct WebResizeEvent
 {
     public Size Size;
 }

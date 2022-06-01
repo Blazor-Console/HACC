@@ -525,11 +525,11 @@ public partial class WebConsoleDriver
         (mainLoop.Driver as WebMainLoopDriver)!.ProcessInput += this.ProcessInput;
     }
 
-    private void ProcessInput(InputResult inputEvent)
+    private void ProcessInput(WebInputResult inputEvent)
     {
         switch (inputEvent.EventType)
         {
-            case EventType.Key:
+            case WebEventType.Key:
                 {
                     this._keyModifiers = new KeyModifiers();
                     var map = MapKey(keyInfo: inputEvent.KeyEvent.ConsoleKeyInfo);
@@ -562,10 +562,10 @@ public partial class WebConsoleDriver
 
                     break;
                 }
-            case EventType.Mouse:
+            case WebEventType.Mouse:
                 this._mouseHandler?.Invoke(obj: this.ToDriverMouse(me: inputEvent.MouseEvent));
                 break;
-            case EventType.Resize:
+            case WebEventType.Resize:
                 this.WindowWidthPixels = inputEvent.ResizeEvent.Size.Width;
                 this.WindowHeightPixels = inputEvent.ResizeEvent.Size.Height;
                 this.WindowColumns = this.BufferColumns =
@@ -581,35 +581,35 @@ public partial class WebConsoleDriver
     {
         MouseFlags mouseFlag = 0;
 
-        if ((me.ButtonState & MouseButtonState.Button1Pressed) != 0) mouseFlag |= MouseFlags.Button1Pressed;
-        if ((me.ButtonState & MouseButtonState.Button1Released) != 0) mouseFlag |= MouseFlags.Button1Released;
-        if ((me.ButtonState & MouseButtonState.Button1Clicked) != 0) mouseFlag |= MouseFlags.Button1Clicked;
-        if ((me.ButtonState & MouseButtonState.Button1DoubleClicked) != 0) mouseFlag |= MouseFlags.Button1DoubleClicked;
-        if ((me.ButtonState & MouseButtonState.Button1TripleClicked) != 0) mouseFlag |= MouseFlags.Button1TripleClicked;
-        if ((me.ButtonState & MouseButtonState.Button2Pressed) != 0) mouseFlag |= MouseFlags.Button2Pressed;
-        if ((me.ButtonState & MouseButtonState.Button2Released) != 0) mouseFlag |= MouseFlags.Button2Released;
-        if ((me.ButtonState & MouseButtonState.Button2Clicked) != 0) mouseFlag |= MouseFlags.Button2Clicked;
-        if ((me.ButtonState & MouseButtonState.Button2DoubleClicked) != 0) mouseFlag |= MouseFlags.Button2DoubleClicked;
-        if ((me.ButtonState & MouseButtonState.Button2TrippleClicked) != 0)
+        if ((me.ButtonState & WebMouseButtonState.Button1Pressed) != 0) mouseFlag |= MouseFlags.Button1Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button1Released) != 0) mouseFlag |= MouseFlags.Button1Released;
+        if ((me.ButtonState & WebMouseButtonState.Button1Clicked) != 0) mouseFlag |= MouseFlags.Button1Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button1DoubleClicked) != 0) mouseFlag |= MouseFlags.Button1DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button1TripleClicked) != 0) mouseFlag |= MouseFlags.Button1TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button2Pressed) != 0) mouseFlag |= MouseFlags.Button2Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button2Released) != 0) mouseFlag |= MouseFlags.Button2Released;
+        if ((me.ButtonState & WebMouseButtonState.Button2Clicked) != 0) mouseFlag |= MouseFlags.Button2Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button2DoubleClicked) != 0) mouseFlag |= MouseFlags.Button2DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button2TrippleClicked) != 0)
             mouseFlag |= MouseFlags.Button2TripleClicked;
-        if ((me.ButtonState & MouseButtonState.Button3Pressed) != 0) mouseFlag |= MouseFlags.Button3Pressed;
-        if ((me.ButtonState & MouseButtonState.Button3Released) != 0) mouseFlag |= MouseFlags.Button3Released;
-        if ((me.ButtonState & MouseButtonState.Button3Clicked) != 0) mouseFlag |= MouseFlags.Button3Clicked;
-        if ((me.ButtonState & MouseButtonState.Button3DoubleClicked) != 0) mouseFlag |= MouseFlags.Button3DoubleClicked;
-        if ((me.ButtonState & MouseButtonState.Button3TripleClicked) != 0) mouseFlag |= MouseFlags.Button3TripleClicked;
-        if ((me.ButtonState & MouseButtonState.ButtonWheeledUp) != 0) mouseFlag |= MouseFlags.WheeledUp;
-        if ((me.ButtonState & MouseButtonState.ButtonWheeledDown) != 0) mouseFlag |= MouseFlags.WheeledDown;
-        if ((me.ButtonState & MouseButtonState.ButtonWheeledLeft) != 0) mouseFlag |= MouseFlags.WheeledLeft;
-        if ((me.ButtonState & MouseButtonState.ButtonWheeledRight) != 0) mouseFlag |= MouseFlags.WheeledRight;
-        if ((me.ButtonState & MouseButtonState.Button4Pressed) != 0) mouseFlag |= MouseFlags.Button4Pressed;
-        if ((me.ButtonState & MouseButtonState.Button4Released) != 0) mouseFlag |= MouseFlags.Button4Released;
-        if ((me.ButtonState & MouseButtonState.Button4Clicked) != 0) mouseFlag |= MouseFlags.Button4Clicked;
-        if ((me.ButtonState & MouseButtonState.Button4DoubleClicked) != 0) mouseFlag |= MouseFlags.Button4DoubleClicked;
-        if ((me.ButtonState & MouseButtonState.Button4TripleClicked) != 0) mouseFlag |= MouseFlags.Button4TripleClicked;
-        if ((me.ButtonState & MouseButtonState.ReportMousePosition) != 0) mouseFlag |= MouseFlags.ReportMousePosition;
-        if ((me.ButtonState & MouseButtonState.ButtonShift) != 0) mouseFlag |= MouseFlags.ButtonShift;
-        if ((me.ButtonState & MouseButtonState.ButtonCtrl) != 0) mouseFlag |= MouseFlags.ButtonCtrl;
-        if ((me.ButtonState & MouseButtonState.ButtonAlt) != 0) mouseFlag |= MouseFlags.ButtonAlt;
+        if ((me.ButtonState & WebMouseButtonState.Button3Pressed) != 0) mouseFlag |= MouseFlags.Button3Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button3Released) != 0) mouseFlag |= MouseFlags.Button3Released;
+        if ((me.ButtonState & WebMouseButtonState.Button3Clicked) != 0) mouseFlag |= MouseFlags.Button3Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button3DoubleClicked) != 0) mouseFlag |= MouseFlags.Button3DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button3TripleClicked) != 0) mouseFlag |= MouseFlags.Button3TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledUp) != 0) mouseFlag |= MouseFlags.WheeledUp;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledDown) != 0) mouseFlag |= MouseFlags.WheeledDown;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledLeft) != 0) mouseFlag |= MouseFlags.WheeledLeft;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledRight) != 0) mouseFlag |= MouseFlags.WheeledRight;
+        if ((me.ButtonState & WebMouseButtonState.Button4Pressed) != 0) mouseFlag |= MouseFlags.Button4Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button4Released) != 0) mouseFlag |= MouseFlags.Button4Released;
+        if ((me.ButtonState & WebMouseButtonState.Button4Clicked) != 0) mouseFlag |= MouseFlags.Button4Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button4DoubleClicked) != 0) mouseFlag |= MouseFlags.Button4DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button4TripleClicked) != 0) mouseFlag |= MouseFlags.Button4TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.ReportMousePosition) != 0) mouseFlag |= MouseFlags.ReportMousePosition;
+        if ((me.ButtonState & WebMouseButtonState.ButtonShift) != 0) mouseFlag |= MouseFlags.ButtonShift;
+        if ((me.ButtonState & WebMouseButtonState.ButtonCtrl) != 0) mouseFlag |= MouseFlags.ButtonCtrl;
+        if ((me.ButtonState & WebMouseButtonState.ButtonAlt) != 0) mouseFlag |= MouseFlags.ButtonAlt;
 
         return new MouseEvent
         {
@@ -648,13 +648,13 @@ public partial class WebConsoleDriver
 
     public override void SendKeys(char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
     {
-        var input = new InputResult();
+        var input = new WebInputResult();
         ConsoleKey ck;
         if (char.IsLetter(c: keyChar))
             ck = key;
         else
             ck = (ConsoleKey) '\0';
-        input.EventType = EventType.Key;
+        input.EventType = WebEventType.Key;
         input.KeyEvent.ConsoleKeyInfo = new ConsoleKeyInfo(keyChar: keyChar,
             key: ck,
             shift: shift,
