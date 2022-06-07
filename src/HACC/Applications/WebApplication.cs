@@ -33,7 +33,7 @@ public class WebApplication : IDisposable
         if (this._state == null) return;
 
         var firstIteration = false;
-        Application.RunIteration(state: ref this._state,
+        Application.RunMainLoopIteration(state: ref this._state,
             wait: this._wait,
             firstIteration: ref firstIteration);
         if (_timer != null && Application.MainLoop.Timeouts.Count == 0)
@@ -76,7 +76,7 @@ public class WebApplication : IDisposable
         else if (runState?.Toplevel == obj)
         {
             var fi = false;
-            Application.RunIteration(ref runState, true, ref fi);
+            Application.RunMainLoopIteration(ref runState, true, ref fi);
             Application.End(runState);
         }
         if (runState != null)
@@ -122,7 +122,7 @@ public class WebApplication : IDisposable
             this._state = Application.Begin(toplevel: view ?? Application.Top);
             this.WebConsoleDriver.firstRender = false;
             var firstIteration = true;
-            Application.RunIteration(state: ref this._state,
+            Application.RunMainLoopIteration(state: ref this._state,
                 wait: this._wait,
                 firstIteration: ref firstIteration);
         }
