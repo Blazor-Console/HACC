@@ -175,11 +175,11 @@ public partial class WebConsoleDriver
         Colors.Base.Normal = MakeColor(f: ConsoleColor.White,
             b: ConsoleColor.DarkBlue);
         Colors.Base.Focus = MakeColor(f: ConsoleColor.Black,
-            b: ConsoleColor.Cyan);
+            b: ConsoleColor.Gray);
         Colors.Base.HotNormal = MakeColor(f: ConsoleColor.DarkCyan,
             b: ConsoleColor.DarkBlue);
-        Colors.Base.HotFocus = MakeColor(f: ConsoleColor.Yellow,
-            b: ConsoleColor.Cyan);
+        Colors.Base.HotFocus = MakeColor(f: ConsoleColor.Blue,
+            b: ConsoleColor.Gray);
         Colors.Base.Disabled = MakeColor(f: ConsoleColor.DarkGray,
             b: ConsoleColor.DarkBlue);
 
@@ -201,7 +201,7 @@ public partial class WebConsoleDriver
 
         Colors.Dialog.Normal = MakeColor(f: ConsoleColor.Black,
             b: ConsoleColor.Gray);
-        Colors.Dialog.Focus = MakeColor(f: ConsoleColor.Black,
+        Colors.Dialog.Focus = MakeColor(f: ConsoleColor.White,
             b: ConsoleColor.DarkGray);
         Colors.Dialog.HotNormal = MakeColor(f: ConsoleColor.DarkBlue,
             b: ConsoleColor.Gray);
