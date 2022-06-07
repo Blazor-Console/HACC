@@ -12,9 +12,8 @@ C# DotNet 6 HTML ANSI Console Canvas.
   - We're about to bring in some of the other impovements other forks had developed but not merged into the stagnant project.  
 
 ## Beta!
-![Right Click works!](https://user-images.githubusercontent.com/3766240/169219917-215267bc-87c1-4323-a3ca-321c6875240a.png)
+![Lots of demos!](https://user-images.githubusercontent.com/3766240/172476969-972254fb-4ccc-409a-93c5-3d326941c618.gif)
 
-![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/3766240/169589558-01748bbf-154b-42f8-bbf6-2f306e28a889.gif)
 
 ### Features
 - Builtin PNG frame-grabber
