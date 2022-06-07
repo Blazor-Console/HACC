@@ -34,7 +34,7 @@ public partial class WebConsole : ComponentBase
     private Queue<WebInputResult> _inputResultQueue = new();
     private int _screenHeight = 480;
     private int _screenWidth = 640;
-    private bool _firstRender;
+    internal bool _firstRender = true;
 
     [Parameter] public long Height { get; set; }
 
@@ -88,7 +88,9 @@ public partial class WebConsole : ComponentBase
             await JsInterop!.InvokeAsync<object>(identifier: "consoleWindowBeforeUnload",
                 thisObject);
 
+
             await this.OnLoaded.InvokeAsync();
+            _firstRender = false;
             this.OnReadConsoleInput();
 
             Logger.LogDebug(message: "OnAfterRenderAsync: end");
@@ -189,8 +191,6 @@ public partial class WebConsole : ComponentBase
 
             textWidthEm += (int) measuredText;
         }
-        if (_firstRender)
-            _firstRender = false;
         Logger.LogDebug(message: "DrawBufferToFrame: end");
     }
 

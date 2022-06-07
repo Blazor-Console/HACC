@@ -50,8 +50,6 @@ public partial class WebConsoleDriver
     /// </summary>
     public override int[,,] Contents => this.contents;
 
-    internal bool firstRender = true;
-
     private static readonly bool sync = false;
 
     // Current row, and current col, tracked by Move/AddRune only
@@ -252,7 +250,7 @@ public partial class WebConsoleDriver
 
     public override void UpdateScreen()
     {
-        if (this.firstRender) return;
+        if (this._webConsole._firstRender) return;
 
         lock (this.contents)
         {

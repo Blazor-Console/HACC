@@ -41,6 +41,7 @@ public class WebApplication : IDisposable
             _timer!.Change(Timeout.Infinite, Timeout.Infinite);
             _timer.Dispose();
             _timer = null;
+            Application.Refresh();
         }
     }
 
@@ -120,7 +121,6 @@ public class WebApplication : IDisposable
             if (!this._initialized) this.Init();
 
             this._state = Application.Begin(toplevel: view ?? Application.Top);
-            this.WebConsoleDriver.firstRender = false;
             var firstIteration = true;
             Application.RunMainLoopIteration(state: ref this._state,
                 wait: this._wait,
@@ -143,11 +143,13 @@ public class WebApplication : IDisposable
     public virtual void Shutdown()
     {
         Application.Shutdown();
+        this.Dispose();
         this._initialized = false;
     }
 
     public void Dispose()
     {
-        _timer?.Dispose();
+        this._timer?.Dispose();
+        _timer = null;
     }
 }
