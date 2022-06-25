@@ -708,7 +708,7 @@ public partial class WebConsoleDriver
         this.TerminalResized?.Invoke();
     }
 
-    private void ResizeScreen()
+    public override void ResizeScreen()
     {
         if (!this.HeightAsBuffer)
         {
