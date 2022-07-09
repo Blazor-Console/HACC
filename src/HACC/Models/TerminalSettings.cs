@@ -1,4 +1,4 @@
-﻿using HACC.Configuration;
+using HACC.Configuration;
 using HACC.Enumerations;
 using System.Drawing;
 
@@ -15,6 +15,16 @@ public record TerminalSettings
     ///     Terminal window height in characters
     /// </summary>
     public int BufferRows;
+
+    /// <summary>
+    ///     Cursor color.
+    /// </summary>
+    public ConsoleColor CursorColor;
+
+    /// <summary>
+    ///     Alternate blinking cursor color.
+    /// </summary>
+    public ConsoleColor CursorAlternateColor;
 
     /// <summary>
     ///     Cursor height in percentage of character
@@ -124,7 +134,9 @@ public record TerminalSettings
         ConsoleColor terminalForeground = Defaults.ForegroundColor,
         int fontSizePixels = Defaults.FontSize,
         int fontSpacePixels = Defaults.FontSpace,
-        string fontType = Defaults.FontType)
+        string fontType = Defaults.FontType,
+        ConsoleColor cursorColor = Defaults.CursorColor,
+        ConsoleColor cursorAlternateColor = Defaults.CursorAlternateColor)
     {
         this.Title = title;
         this.WindowWidthPixels = windowWidthPixels;
@@ -147,6 +159,8 @@ public record TerminalSettings
         this.FontSizePixels = fontSizePixels;
         this.FontSpacePixels = fontSpacePixels;
         this.FontType = fontType;
+        this.CursorColor = cursorColor;
+        this.CursorAlternateColor = cursorAlternateColor;
     }
 
     public void SetCursorPosition(int x, int y)

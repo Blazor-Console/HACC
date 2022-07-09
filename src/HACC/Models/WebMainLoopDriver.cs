@@ -54,8 +54,9 @@ public class WebMainLoopDriver : IMainLoopDriver
 
     bool IMainLoopDriver.EventsPending(bool wait)
     {
-        return this._inputResult.Count > 0 || this.CheckTimers(wait: wait,
-            waitTimeout: out _);
+        //return this._inputResult.Count > 0 || this.CheckTimers(wait: wait,
+        //    waitTimeout: out _);
+        return true;
     }
 
     void IMainLoopDriver.MainIteration()
@@ -63,9 +64,10 @@ public class WebMainLoopDriver : IMainLoopDriver
         while (this._inputResult.Count > 0) this.ProcessInput?.Invoke(obj: this._inputResult.Dequeue());
     }
 
-    private void WebConsole_ReadConsoleInput(WebInputResult obj)
+    private Task WebConsole_ReadConsoleInput(WebInputResult obj)
     {
         this._inputResult.Enqueue(item: obj);
+        return Task.CompletedTask;
     }
 
     private bool CheckTimers(bool wait, out int waitTimeout)

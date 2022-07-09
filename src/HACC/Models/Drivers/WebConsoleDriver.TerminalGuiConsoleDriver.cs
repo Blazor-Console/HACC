@@ -149,8 +149,9 @@ public partial class WebConsoleDriver
 
     public override void Init(Action terminalResized)
     {
-        this.TerminalSettings = new TerminalSettings();
         this.TerminalResized = terminalResized;
+
+        this.TerminalSettings = new TerminalSettings();
         this.Clear();
         this.ResizeScreen();
         this.UpdateOffScreen();
@@ -243,12 +244,105 @@ public partial class WebConsoleDriver
             this.ForegroundColor = (ConsoleColor) ((color >> 16) & 0xffff);
     }
 
+    private void ProcessResize()
+    {
+        this.ResizeScreen();
+        this.UpdateOffScreen();
+        this.TerminalResized?.Invoke();
+    }
+
+    public override void ResizeScreen()
+    {
+        if (!this.HeightAsBuffer)
+        {
+            if (this.WindowRows > 0)
+                // Can raise an exception while is still resizing.
+                try
+                {
+#pragma warning disable CA1416
+                    this.CursorTop = 0;
+                    this.CursorLeft = 0;
+                    this.WindowTop = 0;
+                    this.WindowLeft = 0;
+#pragma warning restore CA1416
+                }
+                catch (IOException)
+                {
+                    return;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return;
+                }
+        }
+        else
+        {
+            try
+            {
+#pragma warning disable CA1416
+                this.WindowLeft = Math.Max(val1: Math.Min(val1: this.Left,
+                        val2: this.Cols - this.WindowColumns),
+                    val2: 0);
+                this.WindowTop = Math.Max(val1: Math.Min(val1: this.Top,
+                        val2: this.Rows - this.WindowRows),
+                    val2: 0);
+#pragma warning restore CA1416
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        this.Clip = new Rect(x: 0,
+            y: 0,
+            width: this.Cols,
+            height: this.Rows);
+    }
+
+    public override void UpdateOffScreen()
+    {
+        this.contents = new int[this.Rows, this.Cols, 3];
+        this._dirtyLine = new bool[this.Rows];
+
+        // Can raise an exception while is still resizing.
+        try
+        {
+            for (var row = 0; row < this.Rows; row++)
+                for (var c = 0; c < this.Cols; c++)
+                {
+                    this.contents[row,
+                        c,
+                        (int) RuneDataType.Rune] = ' ';
+                    this.contents[row,
+                        c,
+                        (int) RuneDataType.Attribute] = Colors.TopLevel.Normal;
+                    this.contents[row,
+                        c,
+                        (int) RuneDataType.DirtyFlag] = 0;
+                    this._dirtyLine[row] = true;
+                }
+        }
+        catch (IndexOutOfRangeException)
+        {
+        }
+    }
+
+    public override void Refresh()
+    {
+        if (this._webConsole._firstRender) return;
+        Task.WhenAll(
+            Task.Run(this.UpdateScreen),
+            Task.Run(this.UpdateCursor));
+    }
+
     public override void UpdateScreen()
     {
         if (this._webConsole._firstRender) return;
 
         lock (this.contents)
         {
+            this.TerminalSettings.SetCursorPosition(-1, -1);
             var dirtySegments = new List<DirtySegment>();
             var output = new System.Text.StringBuilder();
             var top = this.Top;
@@ -339,17 +433,24 @@ public partial class WebConsoleDriver
             } // row
 
             if (dirtySegments.Count > 0)
-                _ = Task.Run(function: () => this._webConsole.DrawDirtySegmentToCanvas(
+                _ = this._webConsole.DrawDirtySegmentToCanvas(
                     segments: dirtySegments,
-                    terminalSettings: this.TerminalSettings));
+                    terminalSettings: this.TerminalSettings);
         }
     }
 
-    public override void Refresh()
+    public override void UpdateCursor()
     {
-        this.UpdateScreen();
+        if (!this.EnsureCursorVisibility())
+            return;
 
-        this.UpdateCursor();
+        if (this.ccol >= 0 && this.ccol < TerminalSettings.BufferColumns
+            && this.crow >= 0 && this.crow < TerminalSettings.BufferRows)
+        {
+            this.TerminalSettings.SetCursorPosition(this.ccol, this.crow);
+            _ = this._webConsole.DrawCursorToCanvas(
+                terminalSettings: this.TerminalSettings);
+        }
     }
 
     private Attribute _currentAttribute;
@@ -572,43 +673,45 @@ public partial class WebConsoleDriver
 
     private MouseEvent ToDriverMouse(WebMouseEvent me)
     {
-        MouseFlags mouseFlag = 0;
+        MouseFlags mouseFlags = 0;
 
-        if ((me.ButtonState & WebMouseButtonState.Button1Pressed) != 0) mouseFlag |= MouseFlags.Button1Pressed;
-        if ((me.ButtonState & WebMouseButtonState.Button1Released) != 0) mouseFlag |= MouseFlags.Button1Released;
-        if ((me.ButtonState & WebMouseButtonState.Button1Clicked) != 0) mouseFlag |= MouseFlags.Button1Clicked;
-        if ((me.ButtonState & WebMouseButtonState.Button1DoubleClicked) != 0) mouseFlag |= MouseFlags.Button1DoubleClicked;
-        if ((me.ButtonState & WebMouseButtonState.Button1TripleClicked) != 0) mouseFlag |= MouseFlags.Button1TripleClicked;
-        if ((me.ButtonState & WebMouseButtonState.Button2Pressed) != 0) mouseFlag |= MouseFlags.Button2Pressed;
-        if ((me.ButtonState & WebMouseButtonState.Button2Released) != 0) mouseFlag |= MouseFlags.Button2Released;
-        if ((me.ButtonState & WebMouseButtonState.Button2Clicked) != 0) mouseFlag |= MouseFlags.Button2Clicked;
-        if ((me.ButtonState & WebMouseButtonState.Button2DoubleClicked) != 0) mouseFlag |= MouseFlags.Button2DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button1Pressed) != 0) mouseFlags |= MouseFlags.Button1Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button1Released) != 0) mouseFlags |= MouseFlags.Button1Released;
+        if ((me.ButtonState & WebMouseButtonState.Button1Clicked) != 0) mouseFlags |= MouseFlags.Button1Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button1DoubleClicked) != 0) mouseFlags |= MouseFlags.Button1DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button1TripleClicked) != 0) mouseFlags |= MouseFlags.Button1TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button2Pressed) != 0) mouseFlags |= MouseFlags.Button2Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button2Released) != 0) mouseFlags |= MouseFlags.Button2Released;
+        if ((me.ButtonState & WebMouseButtonState.Button2Clicked) != 0) mouseFlags |= MouseFlags.Button2Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button2DoubleClicked) != 0) mouseFlags |= MouseFlags.Button2DoubleClicked;
         if ((me.ButtonState & WebMouseButtonState.Button2TrippleClicked) != 0)
-            mouseFlag |= MouseFlags.Button2TripleClicked;
-        if ((me.ButtonState & WebMouseButtonState.Button3Pressed) != 0) mouseFlag |= MouseFlags.Button3Pressed;
-        if ((me.ButtonState & WebMouseButtonState.Button3Released) != 0) mouseFlag |= MouseFlags.Button3Released;
-        if ((me.ButtonState & WebMouseButtonState.Button3Clicked) != 0) mouseFlag |= MouseFlags.Button3Clicked;
-        if ((me.ButtonState & WebMouseButtonState.Button3DoubleClicked) != 0) mouseFlag |= MouseFlags.Button3DoubleClicked;
-        if ((me.ButtonState & WebMouseButtonState.Button3TripleClicked) != 0) mouseFlag |= MouseFlags.Button3TripleClicked;
-        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledUp) != 0) mouseFlag |= MouseFlags.WheeledUp;
-        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledDown) != 0) mouseFlag |= MouseFlags.WheeledDown;
-        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledLeft) != 0) mouseFlag |= MouseFlags.WheeledLeft;
-        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledRight) != 0) mouseFlag |= MouseFlags.WheeledRight;
-        if ((me.ButtonState & WebMouseButtonState.Button4Pressed) != 0) mouseFlag |= MouseFlags.Button4Pressed;
-        if ((me.ButtonState & WebMouseButtonState.Button4Released) != 0) mouseFlag |= MouseFlags.Button4Released;
-        if ((me.ButtonState & WebMouseButtonState.Button4Clicked) != 0) mouseFlag |= MouseFlags.Button4Clicked;
-        if ((me.ButtonState & WebMouseButtonState.Button4DoubleClicked) != 0) mouseFlag |= MouseFlags.Button4DoubleClicked;
-        if ((me.ButtonState & WebMouseButtonState.Button4TripleClicked) != 0) mouseFlag |= MouseFlags.Button4TripleClicked;
-        if ((me.ButtonState & WebMouseButtonState.ReportMousePosition) != 0) mouseFlag |= MouseFlags.ReportMousePosition;
-        if ((me.ButtonState & WebMouseButtonState.ButtonShift) != 0) mouseFlag |= MouseFlags.ButtonShift;
-        if ((me.ButtonState & WebMouseButtonState.ButtonCtrl) != 0) mouseFlag |= MouseFlags.ButtonCtrl;
-        if ((me.ButtonState & WebMouseButtonState.ButtonAlt) != 0) mouseFlag |= MouseFlags.ButtonAlt;
+            mouseFlags |= MouseFlags.Button2TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button3Pressed) != 0) mouseFlags |= MouseFlags.Button3Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button3Released) != 0) mouseFlags |= MouseFlags.Button3Released;
+        if ((me.ButtonState & WebMouseButtonState.Button3Clicked) != 0) mouseFlags |= MouseFlags.Button3Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button3DoubleClicked) != 0) mouseFlags |= MouseFlags.Button3DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button3TripleClicked) != 0) mouseFlags |= MouseFlags.Button3TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledUp) != 0) mouseFlags |= MouseFlags.WheeledUp;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledDown) != 0) mouseFlags |= MouseFlags.WheeledDown;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledLeft) != 0) mouseFlags |= MouseFlags.WheeledLeft;
+        if ((me.ButtonState & WebMouseButtonState.ButtonWheeledRight) != 0) mouseFlags |= MouseFlags.WheeledRight;
+        if ((me.ButtonState & WebMouseButtonState.Button4Pressed) != 0) mouseFlags |= MouseFlags.Button4Pressed;
+        if ((me.ButtonState & WebMouseButtonState.Button4Released) != 0) mouseFlags |= MouseFlags.Button4Released;
+        if ((me.ButtonState & WebMouseButtonState.Button4Clicked) != 0) mouseFlags |= MouseFlags.Button4Clicked;
+        if ((me.ButtonState & WebMouseButtonState.Button4DoubleClicked) != 0) mouseFlags |= MouseFlags.Button4DoubleClicked;
+        if ((me.ButtonState & WebMouseButtonState.Button4TripleClicked) != 0) mouseFlags |= MouseFlags.Button4TripleClicked;
+        if ((me.ButtonState & WebMouseButtonState.ReportMousePosition) != 0) mouseFlags |= MouseFlags.ReportMousePosition;
+        if ((me.ButtonState & WebMouseButtonState.ButtonShift) != 0) mouseFlags |= MouseFlags.ButtonShift;
+        if ((me.ButtonState & WebMouseButtonState.ButtonCtrl) != 0) mouseFlags |= MouseFlags.ButtonCtrl;
+        if ((me.ButtonState & WebMouseButtonState.ButtonAlt) != 0) mouseFlags |= MouseFlags.ButtonAlt;
+
+        Console.WriteLine($"X:{me.Position.X};Y:{me.Position.Y};Flags:{mouseFlags}");
 
         return new MouseEvent
         {
             X = me.Position.X,
             Y = me.Position.Y,
-            Flags = mouseFlag,
+            Flags = mouseFlags,
         };
     }
 
@@ -617,26 +720,40 @@ public partial class WebConsoleDriver
         return this._currentAttribute;
     }
 
+    private CursorVisibility? savedCursorVisibility;
+
     /// <inheritdoc />
     public override bool GetCursorVisibility(out CursorVisibility visibility)
     {
-        visibility = this.CursorVisible ? CursorVisibility.Default : CursorVisibility.Invisible;
+        visibility = this.savedCursorVisibility ?? CursorVisibility.Default;
+        this.CursorVisible = visibility == CursorVisibility.Default;
 
-        return false;
+        return this.CursorVisible;
     }
 
     /// <inheritdoc />
     public override bool SetCursorVisibility(CursorVisibility visibility)
     {
+        this.savedCursorVisibility = visibility;
         this.CursorVisible = visibility != CursorVisibility.Invisible;
 
-        return false;
+        return this.CursorVisible;
     }
 
     /// <inheritdoc />
     public override bool EnsureCursorVisibility()
     {
-        return false;
+        if (!(this.ccol >= 0 && this.crow >= 0
+            && this.ccol < this.Cols && this.crow < this.Rows))
+        {
+            GetCursorVisibility(out CursorVisibility cursorVisibility);
+            this.savedCursorVisibility = cursorVisibility;
+            SetCursorVisibility(CursorVisibility.Invisible);
+            return false;
+        }
+
+        SetCursorVisibility(this.savedCursorVisibility ?? CursorVisibility.Default);
+        return this.savedCursorVisibility == CursorVisibility.Default;
     }
 
     public override void SendKeys(char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
@@ -701,90 +818,6 @@ public partial class WebConsoleDriver
         }
     }
 
-    private void ProcessResize()
-    {
-        this.ResizeScreen();
-        this.UpdateOffScreen();
-        this.TerminalResized?.Invoke();
-    }
-
-    public override void ResizeScreen()
-    {
-        if (!this.HeightAsBuffer)
-        {
-            if (this.WindowRows > 0)
-                // Can raise an exception while is still resizing.
-                try
-                {
-#pragma warning disable CA1416
-                    this.CursorTop = 0;
-                    this.CursorLeft = 0;
-                    this.WindowTop = 0;
-                    this.WindowLeft = 0;
-#pragma warning restore CA1416
-                }
-                catch (IOException)
-                {
-                    return;
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    return;
-                }
-        }
-        else
-        {
-            try
-            {
-#pragma warning disable CA1416
-                this.WindowLeft = Math.Max(val1: Math.Min(val1: this.Left,
-                        val2: this.Cols - this.WindowColumns),
-                    val2: 0);
-                this.WindowTop = Math.Max(val1: Math.Min(val1: this.Top,
-                        val2: this.Rows - this.WindowRows),
-                    val2: 0);
-#pragma warning restore CA1416
-            }
-            catch (Exception)
-            {
-                return;
-            }
-        }
-
-        this.Clip = new Rect(x: 0,
-            y: 0,
-            width: this.Cols,
-            height: this.Rows);
-    }
-
-    public override void UpdateOffScreen()
-    {
-        this.contents = new int[this.Rows, this.Cols, 3];
-        this._dirtyLine = new bool[this.Rows];
-
-        // Can raise an exception while is still resizing.
-        try
-        {
-            for (var row = 0; row < this.Rows; row++)
-                for (var c = 0; c < this.Cols; c++)
-                {
-                    this.contents[row,
-                        c,
-                        (int) RuneDataType.Rune] = ' ';
-                    this.contents[row,
-                        c,
-                        (int) RuneDataType.Attribute] = Colors.TopLevel.Normal;
-                    this.contents[row,
-                        c,
-                        (int) RuneDataType.DirtyFlag] = 0;
-                    this._dirtyLine[row] = true;
-                }
-        }
-        catch (IndexOutOfRangeException)
-        {
-        }
-    }
-
     public override bool GetColors(int value, out Color foreground, out Color background)
     {
         var hasColor = false;
@@ -814,11 +847,6 @@ public partial class WebConsoleDriver
     }
 
     #region Unused
-
-    public override void UpdateCursor()
-    {
-        //
-    }
 
     public override void StartReportingMouseMoves()
     {

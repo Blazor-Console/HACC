@@ -15,6 +15,8 @@ public static class Defaults
     public const int InitialBufferColumns = 80;
     public const int InitialColumns = 80;
     public const int InitialRows = 25;
+    public const ConsoleColor CursorColor = ConsoleColor.Red;
+    public const ConsoleColor CursorAlternateColor = ConsoleColor.Yellow;
     public const int CursorSize = 100;
     public const int CursorHeight = 100;
     public const bool CursorVisibility = true;

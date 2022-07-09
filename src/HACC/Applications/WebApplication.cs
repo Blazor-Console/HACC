@@ -9,9 +9,11 @@ public class WebApplication : IDisposable
 {
     private readonly bool _wait = true;
     private bool _initialized;
-    private Application.RunState? _state;
+    private Application.RunState? _currentRunState;
     private List<Application.RunState> _runStates = new List<Application.RunState>();
     private Timer? _timer;
+    private Application.RunState? _stoppingRunState;
+    private bool _running;
 
     public readonly WebConsole WebConsole;
     public readonly WebConsoleDriver WebConsoleDriver;
@@ -28,26 +30,43 @@ public class WebApplication : IDisposable
         this.WebConsole.RunIterationNeeded += this.WebConsole_RunIterationNeeded;
     }
 
-    private void WebConsole_RunIterationNeeded()
+    private Task WebConsole_RunIterationNeeded()
     {
-        if (this._state == null) return;
+        if (this._currentRunState == null) return Task.CompletedTask;
 
+        this._running = true;
         var firstIteration = false;
-        Application.RunMainLoopIteration(state: ref this._state,
+        Application.RunMainLoopIteration(state: ref this._currentRunState,
             wait: this._wait,
             firstIteration: ref firstIteration);
-        if (_timer != null && Application.MainLoop.Timeouts.Count == 0)
+        if (this._currentRunState.Toplevel != Application.Top && (!this._currentRunState.Toplevel.Running
+            || this._stoppingRunState != null))
         {
-            _timer!.Change(Timeout.Infinite, Timeout.Infinite);
-            _timer.Dispose();
-            _timer = null;
-            Application.Refresh();
+            Application.RunState? runState;
+            if (this._stoppingRunState != null && this._stoppingRunState.Toplevel != this._currentRunState.Toplevel)
+            {
+                runState = this._runStates.Find(rs => rs.Toplevel == this._stoppingRunState.Toplevel);
+            }
+            else
+            {
+                runState = this._currentRunState;
+            }
+            Application.End(runState);
+            this._runStates.Remove(runState!);
+            this._stoppingRunState = null;
+            if (this._currentRunState.Toplevel != Application.Current)
+            {
+                this._currentRunState = new Application.RunState(Application.Current);
+            }
         }
+        this._running = false;
+
+        return Task.CompletedTask;
     }
 
-    public virtual void Init()
+    public virtual Task Init()
     {
-        if (this._initialized) return;
+        if (this._initialized) return Task.CompletedTask;
 
         Application.ExitRunLoopAfterFirstIteration = true;
         Application.Init(
@@ -55,47 +74,56 @@ public class WebApplication : IDisposable
             mainLoopDriver: this.WebMainLoopDriver);
         Application.NotifyNewRunState += this.Application_NotifyNewRunState;
         Application.NotifyStopRunState += this.Application_NotifyStopRunState;
-        Application.MainLoop.TimeoutAdded += this.MainLoop_TimeoutAdded;
+        //Application.MainLoop.TimeoutAdded += this.MainLoop_TimeoutAdded;
         this._initialized = true;
+        _timer = new Timer((_) => this.ProcessTimer(), null, 1000, 1000);
+        return Task.CompletedTask;
     }
 
-    private void MainLoop_TimeoutAdded(long obj)
+    private void ProcessTimer()
     {
-        var now = DateTime.UtcNow.Ticks;
-        var waitTimeout = Math.Max((int) ((obj - now) / TimeSpan.TicksPerMillisecond), 0);
-        _timer = new Timer(_ => this.WebConsole.OnTimeout(),
-            null, waitTimeout, Timeout.Infinite);
+        if (this._running)
+            return;
+
+        if (Application.MainLoop.Timeouts.Count > 0)
+        {
+            var now = DateTime.UtcNow.Ticks;
+            var waitTimeout = (int) ((Application.MainLoop.Timeouts.Keys[index: 0] - now) / TimeSpan.TicksPerMillisecond);
+            if (waitTimeout < 0)
+                this.WebConsole.OnTimeout();
+        }
+        else
+        {
+            this.WebConsoleDriver.UpdateCursor();
+        }
     }
+
+    //private void MainLoop_TimeoutAdded(long obj)
+    //{
+    //    var now = DateTime.UtcNow.Ticks;
+    //    var waitTimeout = Math.Max((int) ((obj - now) / TimeSpan.TicksPerMillisecond), 0);
+    //_timer = new Timer(_ => this.WebConsole.OnTimeout(),
+    //    null, waitTimeout, Timeout.Infinite);
+    //}
 
     private void Application_NotifyStopRunState(Toplevel obj)
     {
-        var runState = _runStates.Find(rs => rs.Toplevel == obj);
-        if (runState?.Toplevel == obj && Application.Current == obj)
-        {
-            Application.End(runState);
-        }
-        else if (runState?.Toplevel == obj)
-        {
-            var fi = false;
-            Application.RunMainLoopIteration(ref runState, true, ref fi);
-            Application.End(runState);
-        }
-        if (runState != null)
-            this._runStates.Remove(runState);
+        this._stoppingRunState = new Application.RunState(obj);
     }
 
     private void Application_NotifyNewRunState(Application.RunState obj)
     {
-        this._runStates.Add(obj);
+        this._runStates.Add(new Application.RunState(obj.Toplevel));
     }
 
-    public virtual void Run(Func<Exception, bool>? errorHandler = null)
+    public virtual Task Run(Func<Exception, bool>? errorHandler = null)
     {
         this.Run(view: Application.Top,
             errorHandler: errorHandler);
+        return Task.CompletedTask;
     }
 
-    public virtual void Run<T>(Func<Exception, bool>? errorHandler = null)
+    public virtual Task Run<T>(Func<Exception, bool>? errorHandler = null)
         where T : Toplevel, new()
     {
         if (this._initialized && Application.Driver != null)
@@ -112,17 +140,20 @@ public class WebApplication : IDisposable
             this.Run(view: Application.Top,
                 errorHandler: errorHandler);
         }
+        return Task.CompletedTask;
     }
 
-    public virtual void Run(Toplevel view, Func<Exception, bool>? errorHandler = null)
+    public virtual Task Run(Toplevel view, Func<Exception, bool>? errorHandler = null)
     {
         try
         {
             if (!this._initialized) this.Init();
 
-            this._state = Application.Begin(toplevel: view ?? Application.Top);
+            this._currentRunState = Application.Begin(toplevel: view ?? Application.Top);
+            this._currentRunState.Toplevel.Running = true;
+            this._runStates.Add(new Application.RunState(this._currentRunState.Toplevel));
             var firstIteration = true;
-            Application.RunMainLoopIteration(state: ref this._state,
+            Application.RunMainLoopIteration(state: ref this._currentRunState,
                 wait: this._wait,
                 firstIteration: ref firstIteration);
         }
@@ -130,21 +161,24 @@ public class WebApplication : IDisposable
         {
             if (!errorHandler(arg: error)) this.Shutdown();
         }
+        return Task.CompletedTask;
     }
 
-    public virtual void End(Application.RunState? runState = null)
+    public virtual Task End(Application.RunState? runState = null)
     {
-        if (!this._initialized) return;
+        if (!this._initialized) return Task.CompletedTask;
 
-        if (runState != null || this._state != null)
-            Application.End(runState: runState ?? this._state);
+        if (runState != null || this._currentRunState != null)
+            Application.End(runState: runState ?? this._currentRunState);
+        return Task.CompletedTask;
     }
 
-    public virtual void Shutdown()
+    public virtual Task Shutdown()
     {
         Application.Shutdown();
         this.Dispose();
         this._initialized = false;
+        return Task.CompletedTask;
     }
 
     public void Dispose()

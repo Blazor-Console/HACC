@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System.Globalization;
 using Terminal.Gui;
+using Point = System.Drawing.Point;
 
 namespace HACC.Components;
 
@@ -48,10 +49,10 @@ public partial class WebConsole : ComponentBase
 
     [Parameter] public EventCallback OnLoaded { get; set; }
 
-    public bool CanvasInitialized => _canvas2DContext != null;
+    public bool CanvasInitialized => this._canvas2DContext != null;
 
-    public event Action<WebInputResult>? ReadConsoleInput;
-    public event Action? RunIterationNeeded;
+    public event Func<WebInputResult, Task>? ReadConsoleInput;
+    public event Func<Task>? RunIterationNeeded;
 
     protected override Task OnInitializedAsync()
     {
@@ -194,6 +195,53 @@ public partial class WebConsole : ComponentBase
         Logger.LogDebug(message: "DrawBufferToFrame: end");
     }
 
+    private string? curColor;
+
+    public async Task DrawCursorToCanvas(TerminalSettings terminalSettings)
+    {
+        if (this._canvas2DContext == null) return;
+        var left = terminalSettings.CursorPosition.X;
+        var top = terminalSettings.CursorPosition.Y;
+        if (left == -1 || top == -1)
+            return;
+
+        Logger.LogDebug(message: "DrawCursorToCanvas");
+        var textWidthEm = left * terminalSettings.FontSpacePixels;
+        var letterWidthPx = terminalSettings.FontSizePixels * terminalSettings.CursorHeight / terminalSettings.CursorHeight;
+        await this._canvas2DContext!.SetFontAsync(
+                value: $"{letterWidthPx}px " +
+                       $"{terminalSettings.FontType}");
+        await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
+        var measuredText = 1 * terminalSettings.CursorSize / terminalSettings.CursorSize;
+        if (string.IsNullOrEmpty(this.curColor))
+        {
+            this.curColor = terminalSettings.CursorColor.ToString();
+        }
+        else if (this.curColor == terminalSettings.CursorColor.ToString())
+        {
+            this.curColor = terminalSettings.CursorAlternateColor.ToString();
+        }
+        else
+        {
+            this.curColor = terminalSettings.CursorColor.ToString();
+        }
+        await this._canvas2DContext!.SetFillStyleAsync(
+                value: curColor);
+        await this._canvas2DContext.FillRectAsync(
+            x: textWidthEm,
+            y: top * letterWidthPx,
+            width: measuredText,
+            height: letterWidthPx);
+        await this._canvas2DContext!.SetStrokeStyleAsync(
+            value: "green");
+        await this._canvas2DContext.StrokeTextAsync(text: "",
+            x: textWidthEm,
+            y: top * letterWidthPx,
+            maxWidth: measuredText);
+
+        Logger.LogDebug(message: "DrawCursorToCanvas: end");
+    }
+
     /// <summary>
     ///     Invoke the javascript beep function (copied from JavasScript/beep.js)
     /// </summary>
@@ -232,23 +280,23 @@ public partial class WebConsole : ComponentBase
         // ReSharper restore HeapView.ObjectAllocation
     }
 
-    bool _isReadConsoleInput;
+    private bool _isReadConsoleInput;
 
     public virtual void OnReadConsoleInput()
     {
         if (this.ReadConsoleInput == null)
             return;
 
-        _isReadConsoleInput = true;
-        while (_inputResultQueue.Count > 0)
+        this._isReadConsoleInput = true;
+        while (this._inputResultQueue.Count > 0)
         {
-            this.ReadConsoleInput?.Invoke(obj: _inputResultQueue.Dequeue());
-            OnRunIterationNeeded();
+            this.ReadConsoleInput?.Invoke(arg: this._inputResultQueue.Dequeue());
+            this.OnRunIterationNeeded();
         }
-        _isReadConsoleInput = false;
+        this._isReadConsoleInput = false;
     }
 
-    bool _isRunIterationNeeded;
+    private bool _isRunIterationNeeded;
 
     public virtual void OnRunIterationNeeded()
     {
@@ -259,18 +307,20 @@ public partial class WebConsole : ComponentBase
 
     public virtual void OnTimeout()
     {
-        if (!_isReadConsoleInput && !_isRunIterationNeeded)
+        if (!this._isReadConsoleInput && !this._isRunIterationNeeded)
             this.OnRunIterationNeeded();
     }
 
     public virtual void OnWakeup()
     {
-        if (!_isReadConsoleInput && !_isRunIterationNeeded)
+        if (!this._isReadConsoleInput && !this._isRunIterationNeeded)
             this.OnRunIterationNeeded();
     }
 
-    WebMouseButtonState? _lastButtonPressed;
-    WebMouseEvent _lastMouseEvent;
+    private WebMouseButtonState? _lastButtonPressed;
+    private WebMouseEvent _lastMouseEvent;
+    private Point? point;
+    private bool processButtonClick;
 
     [JSInvokable]
     public ValueTask OnCanvasMouse(MouseEventArgs obj)
@@ -290,16 +340,16 @@ public partial class WebConsole : ComponentBase
         {
             Task.Run(async () => await ProcessContinuousButtonPressedAsync());
         }
-        else if (obj.Type == "mouseup")
+        else if (obj.Type == "mouseup" && this.processButtonClick)
         {
             this.ProcessClickEvent(me);
         }
-        return ValueTask.FromCanceled(new CancellationToken(true));
+        return ValueTask.CompletedTask;
     }
 
     private async Task ProcessContinuousButtonPressedAsync()
     {
-        while (_lastButtonPressed != null)
+        while (this._lastButtonPressed != null)
         {
             await Task.Delay(100);
             var view = Application.WantContinuousButtonPressedView;
@@ -307,7 +357,7 @@ public partial class WebConsole : ComponentBase
             {
                 break;
             }
-            if (_lastButtonPressed != null)
+            if (this._lastButtonPressed != null)
             {
                 var inputResult = new WebInputResult
                 {
@@ -352,6 +402,7 @@ public partial class WebConsole : ComponentBase
             EventType = WebEventType.Mouse,
             MouseEvent = mouseEvent
         };
+        this.processButtonClick = false;
         this._inputResultQueue.Enqueue(inputResult);
         this.OnReadConsoleInput();
     }
@@ -359,31 +410,36 @@ public partial class WebConsole : ComponentBase
     private bool GetMouseEvent(MouseEventArgs me, out WebMouseEvent mouseEvent)
     {
         mouseEvent = new WebMouseEvent();
-        WebMouseButtonState buttonState;
-        switch (me.Type)
-        {
-            case "mousedown":
-                _lastButtonPressed = buttonState = GetButtonPressed();
-                break;
-            case "mouseup":
-                buttonState = GetButtonReleased();
-                _lastButtonPressed = null;
-                break;
-            case "mousemove":
-                buttonState = WebMouseButtonState.ReportMousePosition;
-                if (_lastButtonPressed != null)
-                    buttonState |= (WebMouseButtonState) _lastButtonPressed;
-                break;
-            default:
-                return false;
-        }
-        mouseEvent.ButtonState = buttonState;
         var terminalSettings = this.WebConsoleDriver!.TerminalSettings;
         if (me.OffsetX > terminalSettings.WindowWidthPixels
             || me.OffsetY > terminalSettings.WindowHeightPixels)
             return false;
         mouseEvent.Position.X = (int) me.OffsetX / terminalSettings.FontSpacePixels;
         mouseEvent.Position.Y = (int) me.OffsetY / terminalSettings.FontSizePixels;
+        WebMouseButtonState buttonState;
+        switch (me.Type)
+        {
+            case "mousedown":
+                this._lastButtonPressed = buttonState = GetButtonPressed();
+                if (this.point == null)
+                {
+                    this.point = mouseEvent.Position;
+                }
+                break;
+            case "mouseup":
+                buttonState = GetButtonReleased(mouseEvent);
+                this._lastButtonPressed = null;
+                this.point = null;
+                break;
+            case "mousemove":
+                buttonState = WebMouseButtonState.ReportMousePosition;
+                if (this._lastButtonPressed != null)
+                    buttonState |= (WebMouseButtonState) this._lastButtonPressed;
+                break;
+            default:
+                return false;
+        }
+        mouseEvent.ButtonState = buttonState;
         return true;
 
         WebMouseButtonState GetButtonPressed()
@@ -397,10 +453,20 @@ public partial class WebConsole : ComponentBase
             };
         }
 
-        WebMouseButtonState GetButtonReleased()
+        WebMouseButtonState GetButtonReleased(WebMouseEvent mouseEvent)
         {
             if (me.Detail == 1)
             {
+                if (this.point != null && (((Point) this.point).X == mouseEvent.Position.X
+                    && ((Point) this.point).Y == mouseEvent.Position.Y))
+                {
+                    this.processButtonClick = true;
+                }
+                else
+                {
+                    this.point = null;
+                }
+
                 return me.Button switch
                 {
                     0 => WebMouseButtonState.Button1Released,
@@ -409,17 +475,7 @@ public partial class WebConsole : ComponentBase
                     _ => WebMouseButtonState.Button4Released,
                 };
             }
-            else if (me.Detail + 1 == 2)
-            {
-                return me.Button switch
-                {
-                    0 => WebMouseButtonState.Button1Clicked,
-                    1 => WebMouseButtonState.Button2Clicked,
-                    2 => WebMouseButtonState.Button3Clicked,
-                    _ => WebMouseButtonState.Button4Clicked,
-                };
-            }
-            else if (me.Detail + 1 == 3)
+            else if (me.Detail == 2)
             {
                 return me.Button switch
                 {
@@ -454,7 +510,7 @@ public partial class WebConsole : ComponentBase
         };
         this._inputResultQueue.Enqueue(inputResult);
         this.OnReadConsoleInput();
-        return ValueTask.FromCanceled(new CancellationToken(true));
+        return ValueTask.CompletedTask;
     }
 
     private bool GetWheelEvent(WheelEventArgs we, out WebMouseEvent mouseEvent)
