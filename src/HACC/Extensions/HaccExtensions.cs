@@ -1,3 +1,4 @@
+using HACC.Applications;
 using HACC.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,11 @@ public static class HaccExtensions
     private static ServiceProvider? _serviceProvider;
     private static ILoggerFactory? _loggerFactory;
 
+    private static WebApplication? _webApplication;
     private static WebClipboard? _webClipboard;
+
+    public static WebApplication WebApplication =>
+        _webApplication ?? throw new InvalidOperationException(message: DefaultError);
 
     public static WebClipboard WebClipboard =>
         _webClipboard ?? throw new InvalidOperationException(message: DefaultError);
@@ -43,6 +48,7 @@ public static class HaccExtensions
 
         _serviceProvider = builder.Services.BuildServiceProvider();
         _loggerFactory = _serviceProvider.GetService<ILoggerFactory>()!;
+        _webApplication = new WebApplication();
         _webClipboard = new WebClipboard();
 
         return builder;

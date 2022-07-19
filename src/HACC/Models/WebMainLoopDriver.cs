@@ -38,7 +38,7 @@ public class WebMainLoopDriver : IMainLoopDriver
     public WebMainLoopDriver(WebConsole webConsole)
     {
         this._webConsole = webConsole ??
-                           throw new ArgumentNullException(paramName: "Console driver instance must be provided.");
+            throw new ArgumentNullException(paramName: "Console driver instance must be provided.");
     }
 
     void IMainLoopDriver.Setup(MainLoop mainLoop)

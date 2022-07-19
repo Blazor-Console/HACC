@@ -447,9 +447,11 @@ public partial class WebConsoleDriver
         if (this.ccol >= 0 && this.ccol < TerminalSettings.BufferColumns
             && this.crow >= 0 && this.crow < TerminalSettings.BufferRows)
         {
+            var rune = (char) contents[crow, ccol, (int) RuneDataType.Rune];
             this.TerminalSettings.SetCursorPosition(this.ccol, this.crow);
             _ = this._webConsole.DrawCursorToCanvas(
-                terminalSettings: this.TerminalSettings);
+                terminalSettings: this.TerminalSettings,
+                rune: rune);
         }
     }
 
@@ -615,7 +617,6 @@ public partial class WebConsoleDriver
         this._mouseHandler = mouseHandler;
 
         // ReSharper disable once HeapView.DelegateAllocation
-        // Note: Net doesn't support keydown/up events and thus any passed keyDown/UpHandlers will never be called
         (mainLoop.Driver as WebMainLoopDriver)!.ProcessInput += this.ProcessInput;
     }
 

@@ -1,6 +1,6 @@
 using Blazor.Extensions;
 using Blazor.Extensions.Canvas.Canvas2D;
-using HACC.Applications;
+using HACC.Enumerations;
 using HACC.Extensions;
 using HACC.Models;
 using HACC.Models.Drivers;
@@ -16,7 +16,7 @@ using Point = System.Drawing.Point;
 
 namespace HACC.Components;
 
-public partial class WebConsole : ComponentBase
+public partial class WebConsole : ComponentBase, IAsyncDisposable
 {
     private static readonly IJSRuntime JsInterop = HaccExtensions.GetService<IJSRuntime>();
     private static readonly ILogger Logger = HaccExtensions.CreateLogger<WebConsole>();
@@ -26,6 +26,7 @@ public partial class WebConsole : ComponentBase
     protected BECanvasComponent? _becanvas;
 
     protected Canvas2DContext? _canvas2DContext;
+    protected Canvas2DContext? _canvas2DCursorContext;
 
     /// <summary>
     ///     Null until after render
@@ -40,8 +41,6 @@ public partial class WebConsole : ComponentBase
     [Parameter] public long Height { get; set; }
 
     [Parameter] public long Width { get; set; }
-
-    public WebApplication? WebApplication { get; private set; }
 
     public WebConsoleDriver? WebConsoleDriver { get; private set; }
 
@@ -60,11 +59,6 @@ public partial class WebConsole : ComponentBase
             webClipboard: HaccExtensions.WebClipboard,
             webConsole: this);
         this.WebMainLoopDriver = new WebMainLoopDriver(webConsole: this);
-        this.WebApplication = new WebApplication(
-            webConsoleDriver: this.WebConsoleDriver,
-            webMainLoopDriver: this.WebMainLoopDriver,
-            webConsole: this);
-
         return base.OnInitializedAsync();
     }
 
@@ -77,6 +71,7 @@ public partial class WebConsole : ComponentBase
             _firstRender = firstRender;
 
             _canvas2DContext = await _becanvas.CreateCanvas2DAsync();
+            _canvas2DCursorContext = await _becanvas.CreateCanvas2DAsync();
 
             var thisObject = DotNetObjectReference.Create(value: this);
             await JsInterop!.InvokeVoidAsync(identifier: "initConsole",
@@ -88,11 +83,18 @@ public partial class WebConsole : ComponentBase
                 thisObject);
             await JsInterop!.InvokeAsync<object>(identifier: "consoleWindowBeforeUnload",
                 thisObject);
+            await JsInterop!.InvokeAsync<object>(identifier: "document.consoleWindowVisibilityChange",
+                thisObject);
 
+            await HaccExtensions.WebApplication!.Shutdown();
+            await HaccExtensions.WebApplication.Init(
+                webConsoleDriver: this.WebConsoleDriver,
+                webMainLoopDriver: this.WebMainLoopDriver,
+                webConsole: this);
+
+            _firstRender = false;
 
             await this.OnLoaded.InvokeAsync();
-            _firstRender = false;
-            this.OnReadConsoleInput();
 
             Logger.LogDebug(message: "OnAfterRenderAsync: end");
         }
@@ -197,9 +199,9 @@ public partial class WebConsole : ComponentBase
 
     private string? curColor;
 
-    public async Task DrawCursorToCanvas(TerminalSettings terminalSettings)
+    public async Task DrawCursorToCanvas(TerminalSettings terminalSettings, char rune)
     {
-        if (this._canvas2DContext == null) return;
+        if (this._canvas2DCursorContext == null) return;
         var left = terminalSettings.CursorPosition.X;
         var top = terminalSettings.CursorPosition.Y;
         if (left == -1 || top == -1)
@@ -208,11 +210,10 @@ public partial class WebConsole : ComponentBase
         Logger.LogDebug(message: "DrawCursorToCanvas");
         var textWidthEm = left * terminalSettings.FontSpacePixels;
         var letterWidthPx = terminalSettings.FontSizePixels * terminalSettings.CursorHeight / terminalSettings.CursorHeight;
-        await this._canvas2DContext!.SetFontAsync(
+        await this._canvas2DCursorContext!.SetFontAsync(
                 value: $"{letterWidthPx}px " +
                        $"{terminalSettings.FontType}");
-        await this._canvas2DContext.SetTextBaselineAsync(value: TextBaseline.Top);
-        var measuredText = 1 * terminalSettings.CursorSize / terminalSettings.CursorSize;
+        await this._canvas2DCursorContext.SetTextBaselineAsync(value: TextBaseline.Top);
         if (string.IsNullOrEmpty(this.curColor))
         {
             this.curColor = terminalSettings.CursorColor.ToString();
@@ -225,20 +226,55 @@ public partial class WebConsole : ComponentBase
         {
             this.curColor = terminalSettings.CursorColor.ToString();
         }
-        await this._canvas2DContext!.SetFillStyleAsync(
+        await this._canvas2DCursorContext!.SetFillStyleAsync(
                 value: curColor);
-        await this._canvas2DContext.FillRectAsync(
-            x: textWidthEm,
-            y: top * letterWidthPx,
-            width: measuredText,
-            height: letterWidthPx);
-        await this._canvas2DContext!.SetStrokeStyleAsync(
-            value: "green");
-        await this._canvas2DContext.StrokeTextAsync(text: "",
-            x: textWidthEm,
-            y: top * letterWidthPx,
-            maxWidth: measuredText);
-
+        switch (terminalSettings.CursorType)
+        {
+            case Enumerations.CursorType.Block:
+                var measuredText = (double) TextFormatter.GetTextWidth(text: rune.ToString())
+                    * terminalSettings.FontSpacePixels
+                    * terminalSettings.CursorSize / terminalSettings.CursorSize;
+                await this._canvas2DCursorContext.FillRectAsync(
+                    x: textWidthEm,
+                    y: top * letterWidthPx,
+                    width: 1 * terminalSettings.CursorSize / terminalSettings.CursorSize,
+                    height: letterWidthPx);
+                await this._canvas2DCursorContext.FillRectAsync(
+                    x: textWidthEm,
+                    y: top * letterWidthPx,
+                    width: measuredText,
+                    height: letterWidthPx / 10);
+                await this._canvas2DCursorContext.FillRectAsync(
+                    x: textWidthEm,
+                    y: top * letterWidthPx + terminalSettings.FontSizePixels - (letterWidthPx / 10),
+                    width: measuredText,
+                    height: letterWidthPx / 10);
+                await this._canvas2DCursorContext.FillRectAsync(
+                    x: textWidthEm + measuredText,
+                    y: top * letterWidthPx,
+                    width: 1 * terminalSettings.CursorSize / terminalSettings.CursorSize,
+                    height: letterWidthPx);
+                break;
+            case Enumerations.CursorType.Underline:
+                rune = (char) this.WebConsoleDriver!.Contents[top, left, (int) RuneDataType.Rune];
+                measuredText = (double) await this.MeasureText(text: rune.ToString(),
+                    fontSpacePixels: terminalSettings.FontSpacePixels)
+                     * terminalSettings.CursorSize / terminalSettings.CursorSize;
+                await this._canvas2DCursorContext.FillRectAsync(
+                    x: textWidthEm,
+                    y: top * letterWidthPx + terminalSettings.FontSizePixels - (letterWidthPx / 10),
+                    width: measuredText,
+                    height: letterWidthPx / 10);
+                break;
+            case Enumerations.CursorType.Bar:
+                measuredText = 1 * terminalSettings.CursorSize / terminalSettings.CursorSize;
+                await this._canvas2DCursorContext.FillRectAsync(
+                    x: textWidthEm,
+                    y: top * letterWidthPx,
+                    width: measuredText,
+                    height: letterWidthPx);
+                break;
+        }
         Logger.LogDebug(message: "DrawCursorToCanvas: end");
     }
 
@@ -307,14 +343,14 @@ public partial class WebConsole : ComponentBase
 
     public virtual void OnTimeout()
     {
-        if (!this._isReadConsoleInput && !this._isRunIterationNeeded)
-            this.OnRunIterationNeeded();
+        if (this._isReadConsoleInput || this._isRunIterationNeeded) return;
+        this.OnRunIterationNeeded();
     }
 
     public virtual void OnWakeup()
     {
-        if (!this._isReadConsoleInput && !this._isRunIterationNeeded)
-            this.OnRunIterationNeeded();
+        if (this._isReadConsoleInput || this._isRunIterationNeeded) return;
+        this.OnRunIterationNeeded();
     }
 
     private WebMouseButtonState? _lastButtonPressed;
@@ -707,9 +743,23 @@ public partial class WebConsole : ComponentBase
     }
 
     [JSInvokable]
+    public ValueTask OnVisibilityChange(bool visible)
+    {
+        if (this._canvas2DContext == null) return default;
+        HaccExtensions.WebClipboard.GetClipboardData();
+        return ValueTask.CompletedTask;
+    }
+
+    [JSInvokable]
     public ValueTask OnBeforeUnload()
     {
         if (this._canvas2DContext == null) return ValueTask.CompletedTask;
         return ValueTask.CompletedTask;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return HaccExtensions.WebApplication!.DisposeAsync();
     }
 }

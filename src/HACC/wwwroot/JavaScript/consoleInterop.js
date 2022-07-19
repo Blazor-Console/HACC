@@ -38,6 +38,19 @@ function onBeforeUnload() {
     window.consoleJs.instance.invokeMethodAsync('OnBeforeUnload');
 }
 
+function onVisibilityChange() {
+    if (!window.consoleJs.canvas)
+        return;
+
+    var visible = document.visibilityState === 'visible' ? true : false;
+    if (visible) {
+        console.log("user is focused on the page")
+    } else {
+        console.log("user left the page")
+    }
+    window.consoleJs.instance.invokeMethodAsync('OnVisibilityChange', visible);
+}
+
 window.consoleWindowResize = (instance) => {
     onResize();
 };
@@ -48,6 +61,10 @@ window.consoleWindowFocus = (instance) => {
 
 window.consoleWindowBeforeUnload = (instance) => {
     onBeforeUnload();
+}
+
+document.consoleWindowVisibilityChange = (instance) => {
+    onVisibilityChange();
 }
 
 window.canvasToPng = () => {
@@ -119,6 +136,7 @@ window.initConsole = (instance) => {
     window.addEventListener("resize", onResize);
     window.addEventListener("focus", onFocus);
     window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 };
 
 function getKeyEvent(e) {

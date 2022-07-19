@@ -5,40 +5,97 @@ using Terminal.Gui;
 
 namespace HACC.Applications;
 
-public class WebApplication : IDisposable
+public class WebApplication : IAsyncDisposable
 {
     private readonly bool _wait = true;
     private bool _initialized;
     private Application.RunState? _currentRunState;
-    private List<Application.RunState> _runStates = new List<Application.RunState>();
+    private List<Application.RunState> _runStates = new();
     private Timer? _timer;
     private Application.RunState? _stoppingRunState;
     private bool _running;
+    private CancellationTokenSource? _cancellationTokenSource;
+    private  CancellationToken _cancellationToken;
+    private readonly List<IDisposable> _disposables = new();
 
-    public readonly WebConsole WebConsole;
-    public readonly WebConsoleDriver WebConsoleDriver;
-    public readonly WebMainLoopDriver WebMainLoopDriver;
+    public WebConsole? WebConsole { get; private set; }
+    public WebConsoleDriver? WebConsoleDriver { get; private set; }
+    public WebMainLoopDriver? WebMainLoopDriver { get; private set; }
 
-    public WebApplication(WebConsoleDriver webConsoleDriver,
-        WebMainLoopDriver webMainLoopDriver, WebConsole webConsole)
+    public event Action<Toplevel>? RunStateEnding;
+
+    public virtual async Task Init(ConsoleDriver? webConsoleDriver = null,
+        IMainLoopDriver? webMainLoopDriver = null, WebConsole? webConsole = null)
     {
-        this.WebConsoleDriver = webConsoleDriver;
-        // TODO: we should be able to implement something that reads from the actual key events set up in WebConsole.razor for key press events on the console
-        // Maybe from the Canvas2DContext StdIn
-        this.WebMainLoopDriver = webMainLoopDriver;
+        if (this._initialized) return;
+
+        if (webConsoleDriver == null)
+            throw new ArgumentNullException(nameof(webConsoleDriver));
+        if (webMainLoopDriver == null)
+            throw new ArgumentNullException(nameof(webMainLoopDriver));
+        if (webConsole == null)
+            throw new ArgumentNullException(nameof(webConsole));
+        this.WebConsoleDriver = (WebConsoleDriver?) webConsoleDriver;
+        this.WebMainLoopDriver = (WebMainLoopDriver?) webMainLoopDriver;
         this.WebConsole = webConsole;
+        Application.ExitRunLoopAfterFirstIteration = true;
+        await Task.Run(() => Application.Init(
+            driver: this.WebConsoleDriver,
+            mainLoopDriver: this.WebMainLoopDriver));
+
         this.WebConsole.RunIterationNeeded += this.WebConsole_RunIterationNeeded;
+        this._cancellationTokenSource = new CancellationTokenSource();
+        this._cancellationToken = this._cancellationTokenSource.Token;
+        this._cancellationToken.ThrowIfCancellationRequested();
+        Application.NotifyNewRunState += this.Application_NotifyNewRunState;
+        Application.NotifyStopRunState += this.Application_NotifyStopRunState;
+        //Application.MainLoop.TimeoutAdded += this.MainLoop_TimeoutAdded;
+        this._initialized = true;
+        this._timer = new Timer((_) => this.ProcessTimer(), null, 1000, 1000);
     }
 
-    private Task WebConsole_RunIterationNeeded()
+    private void ProcessTimer()
     {
-        if (this._currentRunState == null) return Task.CompletedTask;
+        if (this._running)
+            return;
+
+        try
+        {
+            if (Application.MainLoop.Timeouts.Count > 0)
+            {
+                var now = DateTime.UtcNow.Ticks;
+                var waitTimeout = (int) ((Application.MainLoop.Timeouts.Keys[index: 0] - now) / TimeSpan.TicksPerMillisecond);
+                if (waitTimeout < 0)
+                    this.WebConsole!.OnTimeout();
+            }
+            else
+            {
+                this.WebConsoleDriver!.UpdateCursor();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ProcessTimer: {ex.Message}");
+        }
+    }
+
+    //private void MainLoop_TimeoutAdded(long obj)
+    //{
+    //    var now = DateTime.UtcNow.Ticks;
+    //    var waitTimeout = Math.Max((int) ((obj - now) / TimeSpan.TicksPerMillisecond), 0);
+    //_timer = new Timer(_ => this.WebConsole.OnTimeout(),
+    //    null, waitTimeout, Timeout.Infinite);
+    //}
+
+    private async Task WebConsole_RunIterationNeeded()
+    {
+        if (this._currentRunState == null) return;
 
         this._running = true;
         var firstIteration = false;
-        Application.RunMainLoopIteration(state: ref this._currentRunState,
+        await Task.Run(() => Application.RunMainLoopIteration(state: ref this._currentRunState,
             wait: this._wait,
-            firstIteration: ref firstIteration);
+            firstIteration: ref firstIteration));
         if (this._currentRunState.Toplevel != Application.Top && (!this._currentRunState.Toplevel.Running
             || this._stoppingRunState != null))
         {
@@ -60,70 +117,63 @@ public class WebApplication : IDisposable
             }
         }
         this._running = false;
-
-        return Task.CompletedTask;
     }
-
-    public virtual Task Init()
-    {
-        if (this._initialized) return Task.CompletedTask;
-
-        Application.ExitRunLoopAfterFirstIteration = true;
-        Application.Init(
-            driver: this.WebConsoleDriver,
-            mainLoopDriver: this.WebMainLoopDriver);
-        Application.NotifyNewRunState += this.Application_NotifyNewRunState;
-        Application.NotifyStopRunState += this.Application_NotifyStopRunState;
-        //Application.MainLoop.TimeoutAdded += this.MainLoop_TimeoutAdded;
-        this._initialized = true;
-        _timer = new Timer((_) => this.ProcessTimer(), null, 1000, 1000);
-        return Task.CompletedTask;
-    }
-
-    private void ProcessTimer()
-    {
-        if (this._running)
-            return;
-
-        if (Application.MainLoop.Timeouts.Count > 0)
-        {
-            var now = DateTime.UtcNow.Ticks;
-            var waitTimeout = (int) ((Application.MainLoop.Timeouts.Keys[index: 0] - now) / TimeSpan.TicksPerMillisecond);
-            if (waitTimeout < 0)
-                this.WebConsole.OnTimeout();
-        }
-        else
-        {
-            this.WebConsoleDriver.UpdateCursor();
-        }
-    }
-
-    //private void MainLoop_TimeoutAdded(long obj)
-    //{
-    //    var now = DateTime.UtcNow.Ticks;
-    //    var waitTimeout = Math.Max((int) ((obj - now) / TimeSpan.TicksPerMillisecond), 0);
-    //_timer = new Timer(_ => this.WebConsole.OnTimeout(),
-    //    null, waitTimeout, Timeout.Infinite);
-    //}
 
     private void Application_NotifyStopRunState(Toplevel obj)
     {
         this._stoppingRunState = new Application.RunState(obj);
+        this.RunStateEnding?.Invoke(obj);
     }
 
     private void Application_NotifyNewRunState(Application.RunState obj)
     {
         this._runStates.Add(new Application.RunState(obj.Toplevel));
-    }
+        View view = obj.Toplevel;
+        var task = Task.Run(async () => await this.RunLoop(obj));
+        task.ContinueWith(async _ =>
+        {
+            this._disposables.Remove(task);
+            await this.WebConsole_RunIterationNeeded();
+        });
+        this._disposables.Add(task);
+        task.Start();
+    } // this line is never hit
 
-    public virtual Task Run(Func<Exception, bool>? errorHandler = null)
+    private async Task RunLoop(Application.RunState runToken)
     {
-        this.Run(view: Application.Top,
-            errorHandler: errorHandler);
-        return Task.CompletedTask;
+        if (!this._initialized) await this.Init();
+
+        var view = runToken.Toplevel;
+        var firstIteration = true;
+        this._currentRunState = runToken;
+        this.WebConsole!.OnReadConsoleInput();
+
+        try
+        {
+            for (view.Running = true; view.Running;)
+            {
+                if (firstIteration)
+                    Application.RunMainLoopIteration(state: ref this._currentRunState,
+                        wait: this._wait,
+                        firstIteration: ref firstIteration);
+
+                await Task.Delay(1000);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            await this.Shutdown();
+            return;
+        }
     }
 
-    public virtual Task Run<T>(Func<Exception, bool>? errorHandler = null)
+    public virtual async Task Run(Func<Exception, bool>? errorHandler = null)
+    {
+        await this.Run(view: Application.Top,
+            errorHandler: errorHandler);
+    }
+
+    public virtual async Task Run<T>(Func<Exception, bool>? errorHandler = null)
         where T : Toplevel, new()
     {
         if (this._initialized && Application.Driver != null)
@@ -131,59 +181,94 @@ public class WebApplication : IDisposable
             var top = new T();
             if (top.GetType().BaseType != typeof(Toplevel))
                 throw new ArgumentException(message: top.GetType().BaseType?.Name);
-            this.Run(view: top,
+            await this.Run(view: top,
                 errorHandler: errorHandler);
         }
         else
         {
-            this.Init();
-            this.Run(view: Application.Top,
+            await this.Init();
+            await this.Run(view: Application.Top,
                 errorHandler: errorHandler);
         }
-        return Task.CompletedTask;
     }
 
-    public virtual Task Run(Toplevel view, Func<Exception, bool>? errorHandler = null)
+    public virtual async Task Run(Toplevel view, Func<Exception, bool>? errorHandler = null)
     {
         try
         {
-            if (!this._initialized) this.Init();
+            if (!this._initialized) await this.Init();
 
-            this._currentRunState = Application.Begin(toplevel: view ?? Application.Top);
-            this._currentRunState.Toplevel.Running = true;
-            this._runStates.Add(new Application.RunState(this._currentRunState.Toplevel));
+            var runToken = Application.Begin(toplevel: view ?? Application.Top);
+            this._runStates.Add(new Application.RunState(runToken.Toplevel));
             var firstIteration = true;
-            Application.RunMainLoopIteration(state: ref this._currentRunState,
-                wait: this._wait,
-                firstIteration: ref firstIteration);
+            this._currentRunState = runToken;
+            this.WebConsole!.OnReadConsoleInput();
+
+            try
+            {
+                for (view!.Running = true; view.Running;)
+                {
+                    if (firstIteration)
+                    {
+                        Application.RunMainLoopIteration(state: ref this._currentRunState,
+                            wait: this._wait,
+                            firstIteration: ref firstIteration);
+                    }
+
+                    await Task.Delay(1000, this._cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            if (!this._cancellationToken.IsCancellationRequested)
+            {
+                if (view == Application.Top)
+                {
+                    await this.End(new Application.RunState(view));
+                    await this.Shutdown();
+                    await this.DisposeAsync();
+                }
+                return;
+            }
         }
         catch (Exception error) when (errorHandler != null)
         {
-            if (!errorHandler(arg: error)) this.Shutdown();
+            if (!errorHandler(arg: error)) await this.Shutdown();
         }
-        return Task.CompletedTask;
     }
 
-    public virtual Task End(Application.RunState? runState = null)
+    public virtual async Task End(Application.RunState? runState = null)
     {
-        if (!this._initialized) return Task.CompletedTask;
+        if (!this._initialized) return;
 
         if (runState != null || this._currentRunState != null)
-            Application.End(runState: runState ?? this._currentRunState);
-        return Task.CompletedTask;
+            await Task.Run(() => Application.End(runState: runState ?? this._currentRunState));
     }
 
     public virtual Task Shutdown()
     {
-        Application.Shutdown();
-        this.Dispose();
-        this._initialized = false;
-        return Task.CompletedTask;
+        return Task.Run(() =>
+        {
+            if (this._timer != null)
+                _ = this._timer!.DisposeAsync();
+            Application.Shutdown();
+            this._initialized = false;
+        });
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        this._timer?.Dispose();
-        _timer = null;
+        await this._timer!.DisposeAsync();
+        this._timer = null;
+        this._cancellationTokenSource!.Cancel();
+        this._cancellationTokenSource.Dispose();
+        this._cancellationTokenSource = null;
+        this.RunStateEnding = null;
+        this._currentRunState = null;
+        this._runStates = new();
+        this._stoppingRunState = null;
+        GC.SuppressFinalize(this);
     }
 }

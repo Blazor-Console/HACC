@@ -15,6 +15,7 @@ public static class Defaults
     public const int InitialBufferColumns = 80;
     public const int InitialColumns = 80;
     public const int InitialRows = 25;
+    public const CursorType CursorShape = CursorType.Block;
     public const ConsoleColor CursorColor = ConsoleColor.Red;
     public const ConsoleColor CursorAlternateColor = ConsoleColor.Yellow;
     public const int CursorSize = 100;
@@ -24,7 +25,6 @@ public static class Defaults
     public const bool TitleVisibility = true;
     public const ConsoleColor BackgroundColor = ConsoleColor.Black;
     public const ConsoleColor ForegroundColor = ConsoleColor.White;
-    public const CursorType CursorShape = CursorType.Block;
     public const float BeepFrequency = 800.0f;
     public const float BeepDurationMsec = 50.0f;
     public const float BeepVolume = 1.0f;
