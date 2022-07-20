@@ -607,6 +607,7 @@ public partial class WebConsoleDriver
     private Action<KeyEvent>? _keyDownHandler;
     private Action<KeyEvent>? _keyUpHandler;
     private Action<MouseEvent>? _mouseHandler;
+    private WebMainLoopDriver _webMainLoop;
 
     public override void PrepareToRun(MainLoop mainLoop, Action<KeyEvent> keyHandler, Action<KeyEvent> keyDownHandler,
         Action<KeyEvent> keyUpHandler, Action<MouseEvent> mouseHandler)
@@ -616,8 +617,10 @@ public partial class WebConsoleDriver
         this._keyUpHandler = keyUpHandler;
         this._mouseHandler = mouseHandler;
 
-        // ReSharper disable once HeapView.DelegateAllocation
-        (mainLoop.Driver as WebMainLoopDriver)!.ProcessInput += this.ProcessInput;
+        if (this._webMainLoop == null)
+            this._webMainLoop = (WebMainLoopDriver) mainLoop.Driver;
+        this._webMainLoop.ProcessInput -= this.ProcessInput;
+        this._webMainLoop.ProcessInput += this.ProcessInput;
     }
 
     private void ProcessInput(WebInputResult inputEvent)
