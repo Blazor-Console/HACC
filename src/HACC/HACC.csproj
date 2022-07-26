@@ -64,7 +64,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj" />
-        <ProjectReference Include="..\gui.cs\Terminal.Gui\Terminal.Gui.csproj" PrivateAssets="All" />
+        <ProjectReference Include="..\Terminal.Gui\Terminal.Gui\Terminal.Gui.csproj" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>

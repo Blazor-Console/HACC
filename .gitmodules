@@ -2,10 +2,10 @@
 	path = src/HACC.Demo
 	url = https://github.com/Blazor-Console/HACC.Demo.git
 	branch = main
-[submodule "src/gui.cs"]
-	path = src/gui.cs
-	url = https://github.com/Blazor-Console/gui.cs.git
-	branch = web-console-fix
+[submodule "src/Terminal.Gui"]
+	path = src/Terminal.Gui
+	url = https://github.com/Blazor-Console/Terminal.Gui.git
+	branch = develop
 [submodule "src/Blazor.Extensions.Canvas"]
 	path = src/Blazor.Extensions.Canvas
 	url = https://github.com/Blazor-Console/Blazor.Extensions.Canvas.git

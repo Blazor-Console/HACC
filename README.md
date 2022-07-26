@@ -5,11 +5,11 @@ C# DotNet 6 HTML ANSI Console Canvas.
 * Contains a virtual terminal character buffer with text and appearance kept separately.
 * Contains a HTML component that renders the character buffer contents.
 * Contains driver code to create a System.Console compatible ANSI Console on an HTML5 Canvas.
-  - Primary driver [Gui.cs](https://github.com/migueldeicaza/gui.cs)
+  - Primary driver [Gui.cs](https://github.com/gui-cs/Terminal.Gui)
   - Secondary driver (in progress) for [Spectre.Console](https://github.com/spectreconsole/spectre.console)
-* Was formerly using the [BlazorExtensions/Canvas](https://github.com/BlazorExtensions/Canvas) project, which has been somewhat stagnent.
+* Was formerly using the [BlazorExtensions/Canvas](https://github.com/BlazorExtensions/Canvas) project, which has been somewhat stagnant.
   - We absorbed the library, also under MIT license, and brought it up to .net 6 and newer typescript, webpack and other npm libraries.
-  - We're about to bring in some of the other impovements other forks had developed but not merged into the stagnant project.  
+  - We're about to bring in some of the other improvements other forks had developed but not merged into the stagnant project.  
 
 ## Beta!
 ![Lots of demos!](https://user-images.githubusercontent.com/3766240/172476969-972254fb-4ccc-409a-93c5-3d326941c618.gif)

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC", "src\HACC\HACC.csproj", "{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "src\gui.cs\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "src\Terminal.Gui\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas", "src\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj", "{5152081F-6837-40CD-9A98-D4F05AC8AC19}"
 EndProject
