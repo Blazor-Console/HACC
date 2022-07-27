@@ -24,6 +24,12 @@ public class WebApplication : IAsyncDisposable
 
     public event Action<Toplevel>? RunStateEnding;
 
+    public event Action<bool>? WebVisibilityChanged;
+
+    public event Action<bool>? WebFocusChanged;
+
+    public event Action? WebPageClosing;
+
     public virtual async Task Init(ConsoleDriver? webConsoleDriver = null,
         IMainLoopDriver? webMainLoopDriver = null, WebConsole? webConsole = null)
     {
@@ -256,6 +262,21 @@ public class WebApplication : IAsyncDisposable
             Application.Shutdown();
             this._initialized = false;
         });
+    }
+
+    internal void OnWebFocusChanged(bool hasFocus)
+    {
+        this.WebFocusChanged?.Invoke(hasFocus);
+    }
+
+    internal void OnWebVisibilityChanged(bool visible)
+    {
+        this.WebVisibilityChanged?.Invoke(visible);
+    }
+
+    internal void OnWebPageClosing()
+    {
+        this.WebPageClosing?.Invoke();
     }
 
     public async ValueTask DisposeAsync()

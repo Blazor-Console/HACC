@@ -81,6 +81,8 @@ public partial class WebConsole : ComponentBase, IAsyncDisposable
                 thisObject);
             await JsInterop!.InvokeAsync<object>(identifier: "consoleWindowFocus",
                 thisObject);
+            await JsInterop!.InvokeAsync<object>(identifier: "consoleWindowBlur",
+                thisObject);
             await JsInterop!.InvokeAsync<object>(identifier: "consoleWindowBeforeUnload",
                 thisObject);
             await JsInterop!.InvokeAsync<object>(identifier: "document.consoleWindowVisibilityChange",
@@ -290,29 +292,29 @@ public partial class WebConsole : ComponentBase, IAsyncDisposable
         if (duration is not null && frequency is not null && volume is not null && type is not null)
             // ReSharper disable HeapView.ObjectAllocation
             await JsInterop.InvokeAsync<Task>(
-                identifier: "beep",
+                identifier: "audioContextBeep",
                 duration.Value.ToString(provider: CultureInfo.InvariantCulture),
                 frequency.Value.ToString(provider: CultureInfo.InvariantCulture),
                 volume.Value.ToString(provider: CultureInfo.InvariantCulture),
                 type);
         if (duration is not null && frequency is not null && volume is not null && type is null)
             await JsInterop.InvokeAsync<Task>(
-                identifier: "beep",
+                identifier: "audioContextBeep",
                 duration.Value.ToString(provider: CultureInfo.InvariantCulture),
                 frequency.Value.ToString(provider: CultureInfo.CurrentCulture),
                 volume.Value.ToString(provider: CultureInfo.InvariantCulture));
         if (duration is not null && frequency is not null && volume is null && type is null)
             await JsInterop.InvokeAsync<Task>(
-                identifier: "beep",
+                identifier: "audioContextBeep",
                 duration.Value.ToString(provider: CultureInfo.InvariantCulture),
                 frequency.Value.ToString(provider: CultureInfo.InvariantCulture));
         if (duration is not null && frequency is null && volume is null && type is null)
             await JsInterop.InvokeAsync<Task>(
-                identifier: "beep",
+                identifier: "audioContextBeep",
                 duration.Value.ToString(provider: CultureInfo.CurrentCulture));
         if (duration is null && frequency is null && volume is null && type is null)
             await JsInterop.InvokeVoidAsync(
-                identifier: "beep");
+                identifier: "audioContextBeep");
         // ReSharper restore HeapView.ObjectAllocation
     }
 
@@ -739,6 +741,24 @@ public partial class WebConsole : ComponentBase, IAsyncDisposable
     {
         if (this._canvas2DContext == null) return default;
         HaccExtensions.WebClipboard.GetClipboardData();
+        HaccExtensions.WebApplication.OnWebFocusChanged(true);
+        return ValueTask.CompletedTask;
+    }
+
+    [JSInvokable]
+    public ValueTask OnFocusOut()
+    {
+        if (this._canvas2DContext == null) return default;
+        HaccExtensions.WebClipboard.GetClipboardData();
+        HaccExtensions.WebApplication.OnWebFocusChanged(false);
+        return ValueTask.CompletedTask;
+    }
+
+    [JSInvokable]
+    public ValueTask OnBlur()
+    {
+        if (this._canvas2DContext == null) return default;
+        HaccExtensions.WebApplication.OnWebFocusChanged(false);
         return ValueTask.CompletedTask;
     }
 
@@ -746,7 +766,9 @@ public partial class WebConsole : ComponentBase, IAsyncDisposable
     public ValueTask OnVisibilityChange(bool visible)
     {
         if (this._canvas2DContext == null) return default;
-        HaccExtensions.WebClipboard.GetClipboardData();
+        if (visible)
+            HaccExtensions.WebClipboard.GetClipboardData();
+        HaccExtensions.WebApplication.OnWebVisibilityChanged(visible);
         return ValueTask.CompletedTask;
     }
 
@@ -754,6 +776,7 @@ public partial class WebConsole : ComponentBase, IAsyncDisposable
     public ValueTask OnBeforeUnload()
     {
         if (this._canvas2DContext == null) return ValueTask.CompletedTask;
+        HaccExtensions.WebApplication.OnWebPageClosing();
         return ValueTask.CompletedTask;
     }
 

@@ -31,6 +31,13 @@ function onFocus() {
     window.consoleJs.instance.invokeMethodAsync('OnFocus');
 }
 
+function onBlur() {
+    if (!window.consoleJs.canvas)
+        return;
+
+    window.consoleJs.instance.invokeMethodAsync('OnBlur');
+}
+
 function onBeforeUnload() {
     if (!window.consoleJs.canvas)
         return;
@@ -57,6 +64,10 @@ window.consoleWindowResize = (instance) => {
 
 window.consoleWindowFocus = (instance) => {
     onFocus();
+}
+
+window.consoleWindowBlur = (instance) => {
+    onBlur();
 }
 
 window.consoleWindowBeforeUnload = (instance) => {
@@ -127,7 +138,7 @@ window.initConsole = (instance) => {
         window.consoleJs.canvas.onblur = (e) => {
             if (!canvasHasFocus)
                 return;
-            window.consoleJs.canvas.focus();
+            window.consoleJs.instance.invokeMethodAsync('OnBlur');
         };
         window.consoleJs.canvas.tabIndex = 0;
         window.consoleJs.canvas.focus();
@@ -135,6 +146,7 @@ window.initConsole = (instance) => {
 
     window.addEventListener("resize", onResize);
     window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
     window.addEventListener("beforeunload", onBeforeUnload);
     document.addEventListener('visibilitychange', onVisibilityChange);
 };

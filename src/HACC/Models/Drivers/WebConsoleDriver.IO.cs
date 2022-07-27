@@ -1,4 +1,4 @@
-﻿using HACC.Configuration;
+using HACC.Configuration;
 using HACC.Enumerations;
 using Spectre.Console;
 using System.Text;
@@ -203,11 +203,11 @@ public partial class WebConsoleDriver
     //
     //   T:System.PlatformNotSupportedException:
     //     The current operating system is not Windows.
-    public async Task Beep(float frequency = Defaults.BeepFrequency, float duration = Defaults.BeepDurationMsec,
-        float volume = Defaults.BeepVolume, BeepType beepType = Defaults.BeepType)
+    public async Task Beep(BeepType? beepType = Defaults.BeepType, float? duration = Defaults.BeepDurationMsec,
+        float? frequency = Defaults.BeepFrequency, float? volume = Defaults.BeepVolume)
     {
         // ReSharper disable once HeapView.BoxingAllocation
-        var type = Enum.GetName(
+        var type = beepType == null ? null : Enum.GetName(
             enumType: typeof(BeepType),
             value: beepType)!.ToLowerInvariant();
         await this._webConsole.Beep(
