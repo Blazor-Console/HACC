@@ -9,4 +9,4 @@
 [submodule "src/Blazor.Extensions.Canvas"]
 	path = src/Blazor.Extensions.Canvas
 	url = https://github.com/Blazor-Console/Blazor.Extensions.Canvas.git
-    branch = main
+	branch = main
