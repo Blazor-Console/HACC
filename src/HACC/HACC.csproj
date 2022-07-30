@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
     <Title>HTML5 Canvas Console and Blazor Extensions</Title>
-    <Description>HTML5 Canvas API implementation and Gui.cs/Terminal.Gui and Spectre.Console components for ASP.NET Core Blazor</Description>
+    <Description>HTML5 Canvas API implementation and Gui-cs/Terminal.Gui and Spectre.Console components for ASP.NET Core Blazor</Description>
     <PackageId>HACC</PackageId>
     <PackageVersion>0.1.1</PackageVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
