@@ -607,7 +607,7 @@ public partial class WebConsoleDriver
     private Action<KeyEvent>? _keyDownHandler;
     private Action<KeyEvent>? _keyUpHandler;
     private Action<MouseEvent>? _mouseHandler;
-    private WebMainLoopDriver _webMainLoop;
+    private WebMainLoopDriver? _webMainLoop;
 
     public override void PrepareToRun(MainLoop mainLoop, Action<KeyEvent> keyHandler, Action<KeyEvent> keyDownHandler,
         Action<KeyEvent> keyUpHandler, Action<MouseEvent> mouseHandler)
