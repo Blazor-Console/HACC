@@ -60,11 +60,11 @@
         <PackageReference Include="Spectre.Console.ImageSharp" Version="0.44.0" />
         <PackageReference Include="Spectre.Console.Registrars.SimpleInjector" Version="0.3.0" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+        <PackageReference Include="Terminal.Gui" Version="1.7.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj" />
-        <ProjectReference Include="..\Terminal.Gui\Terminal.Gui\Terminal.Gui.csproj" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
