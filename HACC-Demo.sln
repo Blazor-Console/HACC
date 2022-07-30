@@ -7,11 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC", "src\HACC\HACC.cspro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Demo", "src\HACC.Demo\HACC.Demo.csproj", "{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "src\gui.cs\Terminal.Gui\Terminal.Gui.csproj", "{BF26B58B-C949-4B9F-8208-15E8CA3245B7}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas", "src\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj", "{9451E28E-8B00-4624-A0A3-6610D54FFA55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Extensions.Canvas.Test.ClientSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ClientSide\Blazor.Extensions.Canvas.Test.ClientSide.csproj", "{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas.Test.ClientSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ClientSide\Blazor.Extensions.Canvas.Test.ClientSide.csproj", "{46FB7FB0-470B-455F-B9BA-3E0F95A8AE3C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas.Test.ServerSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ServerSide\Blazor.Extensions.Canvas.Test.ServerSide.csproj", "{9A9AB208-10CB-42F7-B05A-8CB1F0F2A1F2}"
 EndProject
@@ -40,10 +38,6 @@ Global
 		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A129D6E9-274B-4E5C-81E5-79A36F1D6ED6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF26B58B-C949-4B9F-8208-15E8CA3245B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9451E28E-8B00-4624-A0A3-6610D54FFA55}.Release|Any CPU.ActiveCfg = Release|Any CPU
