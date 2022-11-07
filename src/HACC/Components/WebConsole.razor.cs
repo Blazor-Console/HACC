@@ -1,5 +1,5 @@
-using Blazor.Extensions;
-using Blazor.Extensions.Canvas.Canvas2D;
+using HACC.Blazor.Extensions;
+using HACC.Blazor.Extensions.Canvas.Canvas2D;
 using HACC.Enumerations;
 using HACC.Extensions;
 using HACC.Models;
