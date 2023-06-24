@@ -48,23 +48,23 @@
 	</ItemGroup>
 
 	<ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.7" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.7" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.7" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.7" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.10" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.10" />
         <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
-        <PackageReference Include="Spectre.Console" Version="0.44.0" />
+        <PackageReference Include="Spectre.Console" Version="0.45.0" />
         <PackageReference Include="Spectre.Console.Extensions.Logging" Version="0.2.1" />
         <PackageReference Include="Spectre.Console.Extensions.Progress" Version="1.0.0" />
         <PackageReference Include="Spectre.Console.Extensions.Table" Version="1.0.0" />
-        <PackageReference Include="Spectre.Console.ImageSharp" Version="0.44.0" />
+        <PackageReference Include="Spectre.Console.ImageSharp" Version="0.45.0" />
         <PackageReference Include="Spectre.Console.Registrars.SimpleInjector" Version="0.3.0" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-        <PackageReference Include="Terminal.Gui" Version="1.7.0" />
+        <PackageReference Include="Terminal.Gui" Version="1.8.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj" />
+        <ProjectReference Include="..\HACC.Blazor.Extensions.Canvas\src\HACC.Blazor.Extensions.Canvas\HACC.Blazor.Extensions.Canvas.csproj" />
     </ItemGroup>
 
     <ItemGroup>
