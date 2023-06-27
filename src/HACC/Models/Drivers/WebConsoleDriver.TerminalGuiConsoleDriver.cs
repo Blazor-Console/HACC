@@ -10,7 +10,6 @@ namespace HACC.Models.Drivers;
 
 public partial class WebConsoleDriver
 {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     /// <summary>
     ///     Shortcut to <see cref="WebConsoleDriver.WindowColumns" />
     /// </summary>
@@ -37,7 +36,15 @@ public partial class WebConsoleDriver
     ///     If true then height is measured by the buffer height, enabling scrolling.
     ///     The current <see cref="ConsoleDriver.HeightAsBuffer" /> used in the terminal.
     /// </summary>
+    [Obsolete("Use EnableConsoleScrolling instead.")]
     public override bool HeightAsBuffer { get; set; }
+
+    /// <summary>
+    ///     If false height is measured by the window height and thus no scrolling.
+    ///     If true then height is measured by the buffer height, enabling scrolling.
+    ///     The current <see cref="ConsoleDriver.EnableConsoleScrolling" /> used in the terminal.
+    /// </summary>
+    public override bool EnableConsoleScrolling { get; set; }
 
     public override WebClipboard Clipboard { get; }
 
@@ -253,18 +260,16 @@ public partial class WebConsoleDriver
 
     public override void ResizeScreen()
     {
-        if (!this.HeightAsBuffer)
+        if (!this.EnableConsoleScrolling)
         {
             if (this.WindowRows > 0)
                 // Can raise an exception while is still resizing.
                 try
                 {
-#pragma warning disable CA1416
                     this.CursorTop = 0;
                     this.CursorLeft = 0;
                     this.WindowTop = 0;
                     this.WindowLeft = 0;
-#pragma warning restore CA1416
                 }
                 catch (IOException)
                 {
@@ -279,14 +284,12 @@ public partial class WebConsoleDriver
         {
             try
             {
-#pragma warning disable CA1416
                 this.WindowLeft = Math.Max(val1: Math.Min(val1: this.Left,
                         val2: this.Cols - this.WindowColumns),
                     val2: 0);
                 this.WindowTop = Math.Max(val1: Math.Min(val1: this.Top,
                         val2: this.Rows - this.WindowRows),
                     val2: 0);
-#pragma warning restore CA1416
             }
             catch (Exception)
             {
@@ -617,8 +620,7 @@ public partial class WebConsoleDriver
         this._keyUpHandler = keyUpHandler;
         this._mouseHandler = mouseHandler;
 
-        if (this._webMainLoop == null)
-            this._webMainLoop = (WebMainLoopDriver) mainLoop.Driver;
+        this._webMainLoop ??= (WebMainLoopDriver) mainLoop.Driver;
         this._webMainLoop.ProcessInput -= this.ProcessInput;
         this._webMainLoop.ProcessInput += this.ProcessInput;
     }
@@ -719,11 +721,6 @@ public partial class WebConsoleDriver
         };
     }
 
-    public override Attribute GetAttribute()
-    {
-        return this._currentAttribute;
-    }
-
     private CursorVisibility? savedCursorVisibility;
 
     /// <inheritdoc />
@@ -797,16 +794,16 @@ public partial class WebConsoleDriver
     {
         this.WindowColumns = width;
         this.WindowRows = height;
-        if (width > this.BufferColumns || !this.HeightAsBuffer) this.BufferColumns = width;
+        if (width > this.BufferColumns || !this.EnableConsoleScrolling) this.BufferColumns = width;
 
-        if (height > this.BufferRows || !this.HeightAsBuffer) this.BufferRows = height;
+        if (height > this.BufferRows || !this.EnableConsoleScrolling) this.BufferRows = height;
 
         this.ProcessResize();
     }
 
     public void SetWindowPosition(int left, int top)
     {
-        if (this.HeightAsBuffer)
+        if (this.EnableConsoleScrolling)
         {
             this.WindowLeft = this.WindowLeft = Math.Max(val1: Math.Min(val1: left,
                     val2: this.Cols - this.WindowColumns),
@@ -883,5 +880,4 @@ public partial class WebConsoleDriver
 
     #endregion
 
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

@@ -2,7 +2,7 @@
 	path = src/HACC.Demo
 	url = https://github.com/Blazor-Console/HACC.Demo.git
 	branch = main
-[submodule "src/Blazor.Extensions.Canvas"]
+[submodule "src/HACC.Blazor.Extensions.Canvas"]
 	path = src/HACC.Blazor.Extensions.Canvas
-	url = https://github.com/Blazor-Console/Blazor.Extensions.Canvas.git
+	url = https://github.com/Blazor-Console/HACC.Blazor.Extensions.Canvas.git
 	branch = main

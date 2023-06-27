@@ -1,4 +1,5 @@
-﻿using HACC.Configuration;
+using HACC.Configuration;
+using Terminal.Gui;
 
 namespace HACC.Models.Drivers;
 
@@ -68,5 +69,13 @@ public partial class WebConsoleDriver
     {
         this.ForegroundColor = Defaults.ForegroundColor;
         this.BackgroundColor = Defaults.BackgroundColor;
+    }
+
+    public override Terminal.Gui.Attribute MakeColor(Color foreground, Color background)
+    {
+        this.ForegroundColor = (ConsoleColor)foreground;
+        this.BackgroundColor = (ConsoleColor) background;
+
+        return new Terminal.Gui.Attribute(foreground, background);
     }
 }

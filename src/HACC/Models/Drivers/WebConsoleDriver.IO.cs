@@ -172,7 +172,7 @@ public partial class WebConsoleDriver
     //     Occurs when the System.ConsoleModifiers.Control modifier key (Ctrl) and either
     //     the System.ConsoleKey.C console key (C) or the Break key are pressed simultaneously
     //     (Ctrl+C or Ctrl+Break).
-    public event ConsoleCancelEventHandler? CancelKeyPress
+    public event EventHandler<ConsoleCancelEventArgs> CancelKeyPress
     {
         //[System.Runtime.CompilerServices.NullableContext(2)]
         add => throw new NotImplementedException();

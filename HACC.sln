@@ -5,13 +5,13 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC", "src\HACC\HACC.csproj", "{1A9BF377-DB0B-4A72-8912-F99F1B26DCEE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas", "src\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas\Blazor.Extensions.Canvas.csproj", "{5152081F-6837-40CD-9A98-D4F05AC8AC19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Blazor.Extensions.Canvas", "src\HACC.Blazor.Extensions.Canvas\src\HACC.Blazor.Extensions.Canvas\HACC.Blazor.Extensions.Canvas.csproj", "{5152081F-6837-40CD-9A98-D4F05AC8AC19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas.JS", "src\Blazor.Extensions.Canvas\src\Blazor.Extensions.Canvas.JS\Blazor.Extensions.Canvas.JS.csproj", "{5C839EC5-2449-4EFE-BB9D-992275D4C8F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Blazor.Extensions.Canvas.JS", "src\HACC.Blazor.Extensions.Canvas\src\HACC.Blazor.Extensions.Canvas.JS\HACC.Blazor.Extensions.Canvas.JS.csproj", "{5C839EC5-2449-4EFE-BB9D-992275D4C8F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas.Test.ClientSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ClientSide\Blazor.Extensions.Canvas.Test.ClientSide.csproj", "{CD81725C-C979-4D26-AC4F-18EB86E7F4E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Blazor.Extensions.Canvas.Test.ClientSide", "src\HACC.Blazor.Extensions.Canvas\test\HACC.Blazor.Extensions.Canvas.Test.ClientSide\HACC.Blazor.Extensions.Canvas.Test.ClientSide.csproj", "{CD81725C-C979-4D26-AC4F-18EB86E7F4E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Extensions.Canvas.Test.ServerSide", "src\Blazor.Extensions.Canvas\test\Blazor.Extensions.Canvas.Test.ServerSide\Blazor.Extensions.Canvas.Test.ServerSide.csproj", "{4AB80082-6306-4282-B937-098E8ECB8537}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Blazor.Extensions.Canvas.Test.ServerSide", "src\HACC.Blazor.Extensions.Canvas\test\HACC.Blazor.Extensions.Canvas.Test.ServerSide\HACC.Blazor.Extensions.Canvas.Test.ServerSide.csproj", "{4AB80082-6306-4282-B937-098E8ECB8537}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HACC.Demo", "src\HACC.Demo\HACC.Demo.csproj", "{C071EFA3-2EDE-4EC4-A6A0-F205F4694C67}"
 EndProject

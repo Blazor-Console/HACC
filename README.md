@@ -7,7 +7,7 @@ C# DotNet 6 HTML ANSI Console Canvas.
 * Contains driver code to create a System.Console compatible ANSI Console on an HTML5 Canvas.
   - Primary driver [Terminal.Gui](https://github.com/gui-cs/Terminal.Gui)
   - Secondary driver (in progress) for [Spectre.Console](https://github.com/spectreconsole/spectre.console)
-* Was formerly using the [BlazorExtensions/Canvas](https://github.com/BlazorExtensions/Canvas) project, which has been somewhat stagnant.
+* Was formerly using the [BlazorExtensions/Canvas](https://github.com/Blazor-Console/HACC.Blazor.Extensions.Canvas) project, which has been somewhat stagnant.
   - We absorbed the library, also under MIT license, and brought it up to .net 6 and newer typescript, webpack and other npm libraries.
   - We're about to bring in some of the other improvements other forks had developed but not merged into the stagnant project.  
 

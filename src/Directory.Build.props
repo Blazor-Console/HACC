@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Authors>Digital Defiance Contributors</Authors>
     <Product>Blazor Console Canvas</Product>
-    <Copyright>(c) Digital Defiance and Blazor Extensions Contributors. All rights reserved.</Copyright>
+    <Copyright>(c) Digital Defiance and HACC Blazor Extensions Contributors. All rights reserved.</Copyright>
     <License>MIT</License>
     <PackageProjectUrl>https://github.com/Blazor-Console/HACC</PackageProjectUrl>
-    <PackageTags>Microsoft ASP.NET Core Blazor Extensions Canvas HTML5 ansi console canvas</PackageTags>
+    <PackageTags>Microsoft ASP.NET Core HACC Blazor Extensions Canvas HTML5 ansi console canvas</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <RepositoryUrl>https://github.com/Blazor-Console/HACC</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
