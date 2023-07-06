@@ -33,9 +33,8 @@ C# DotNet 6 HTML ANSI Console Canvas.
 
 ## Future
 
-* https://github.com/JessicaMulein/PlayZMachine will be based on this
-* A possible BBS with door games like ZMachine and a sea-faring game I'm writing in a private repo, (top secret!) which
-  used to have the only test harness solution containing both the source and test repos.
+* Terminal.Gui v2 / DotNet v7 support
+* Spectre.Console driver
 
 # About
 This project was built and is maintained by the [Digital Defiance](https://digitaldefiance.org) ([GitHub page](https://github.com/Digital-Defiance)) - a group of like-minded engineers working together to improve the world and have fun in the process.
