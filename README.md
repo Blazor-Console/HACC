@@ -2,6 +2,14 @@
 
 C# DotNet 6 HTML ANSI Console Canvas.
 
+This has been rendered inoperable with developments in terminal.gui, and the spectre.console driver is HACC 2.0.
+
+This is my final contribution to open source due to health reasons.
+
+https://github.com/spectreconsole/spectre.console/issues/1817
+
+-----
+
 * Contains a virtual terminal character buffer with text and appearance kept separately.
 * Contains a HTML component that renders the character buffer contents.
 * Contains driver code to create a System.Console compatible ANSI Console on an HTML5 Canvas.
